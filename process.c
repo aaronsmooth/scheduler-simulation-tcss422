@@ -43,3 +43,24 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 void ProcessDestructor(ProcessPtr this) {
 	free(this);
 }
+/*
+int main(argc, argv) {
+	if (argc == 2) {
+		printf("2 argument:");
+	} else {
+		printf("more than 2 args");
+	}
+	ProcessPtr newProcPtr = ProcessConstructor(1, 2);
+	ProcessStr newProcStr = *newProcPtr;
+	printf("\n proc type = %d", newProcStr.proc_type);
+	printf("\n proc step numbers = %d", newProcStr.no_steps);
+	printf("\n proc num of req = %d", newProcStr.no_requests);
+	int i;
+	printf("\n proc array list [");
+	//int thelist[50] = (newProcPtr->requests)->;
+	//int alist = *list;
+	for(i = 0; i < newProcStr.no_requests; i++) {
+		printf(" %d ", (newProcStr.requests)[i]);
+	}
+}
+*/
