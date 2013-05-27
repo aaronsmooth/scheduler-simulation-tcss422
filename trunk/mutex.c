@@ -16,7 +16,8 @@ mutexPtr mutexConstructor(int id) {
 	mutexPtr q = (mutexPtr) malloc(sizeof(mutexObj));
 
 	q->mutexID = id;
-	q->owner = PCBConstructor(-1, -1, 2);
+	q->ownerID = -1;
+	q->mutexLocked = 0;
 	q->mutexQueue = QueueConstructor();
 	return q;
 }

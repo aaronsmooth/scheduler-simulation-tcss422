@@ -10,7 +10,7 @@
 //#define REQUESTLISTSIZE 50
 
 typedef struct {
-	int proc_type;       // code for process type, e.g. 0=compute, 1=i0, 2=keyboard, etc.
+	int proc_type;       // code for process type, e.g. 0=compute, 1=i0, 2=keyboard, 3=producer, 4=consumer
 	int	no_steps;		// number of time steps before resetting to 0 - number of instructions
 	int no_requests;	// number of requests that will be generated during the process run
 	int *requests;		// an array of requests, each request (e.g. io service) is issued at a specific

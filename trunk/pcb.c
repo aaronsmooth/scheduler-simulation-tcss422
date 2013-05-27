@@ -19,11 +19,15 @@ PCBPtr PCBConstructor(int id, int type, int IOCount) {
 	apcb->pid = id;
 	apcb->count = rand() % 20;
 	apcb->curr_count = apcb->count;
-	apcb->state = 1;
-	apcb->process = ProcessConstructor(type, IOCount);
-	apcb->waiting_on = -1;
-	apcb->owns = -1;
 
+	apcb->process = ProcessConstructor(type, IOCount);
+	if (type == 2) {
+		apcb->state = 3;
+	} else {
+		apcb->state = 1;
+	}
+	apcb->waiting_on = 0;
+	apcb->owns = -1;
 	return apcb;
 }
 
