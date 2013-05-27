@@ -10,7 +10,8 @@
 
 typedef struct {
 		int mutexID;
-		PCBPtr owner;
+		int ownerID;
+		int mutexLocked;
 		QueuePtr mutexQueue;
 } mutexObj;
 

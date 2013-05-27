@@ -22,10 +22,10 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 	p->no_requests = numofio;
 	int requestslist[50];
 	int i;
-	for (i = 0; i < 50; i++) {
+	for (i = 0; i < 50; i++) { //request list is full of -1's if there are no actual requests that need to be made.
 		if (type == 1 && numofio > 0) {
 			int j;
-			for(j = 0; j < numofio; j++) {
+			for(j = 0; j < numofio; j++) { //creates an io request, only creates as many as there are io devices.
 				requestslist[i] = (rand() % 50) + 1;
 			}
 		} else {
