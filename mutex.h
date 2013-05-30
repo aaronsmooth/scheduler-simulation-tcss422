@@ -10,8 +10,8 @@
 
 typedef struct {
 		int mutexID;
-		int ownerID;
-		int mutexLocked;
+		PCBPtr owner;
+		int mutexLocked; //0 = unlocked, 1 = locked
 		QueuePtr mutexQueue;
 } mutexObj;
 
@@ -20,5 +20,15 @@ typedef mutexObj *mutexPtr;
 mutexPtr mutexConstructor(int);
 
 void mutexDestructor(mutexPtr);
+
+void setOwner(mutexPtr, PCBPtr);
+
+int switchOwner(mutexPtr);
+
+void mutexEnqueue(mutexPtr, PCBPtr);
+
+int checkLock(mutexPtr);
+
+void mutexSwitch(mutexPtr, int);
 
 #endif /* MUTEX_H_ */
