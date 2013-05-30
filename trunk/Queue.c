@@ -29,9 +29,12 @@ void enqueue(Queue *q, PCBStr *x) {
 }
 
 PCBPtr dequeue(Queue *q) {
-	PCBPtr x = q->q[ q->first ];
-	q->first = (q->first + 1) % QUEUE_SIZE;
-	q->count = q->count - 1;
+	PCBPtr x = PCBConstructor(-1, -1, 0);
+	if (q->first != q->last) {
+		x = q->q[ q->first ];
+		q->first = (q->first + 1) % QUEUE_SIZE;
+		q->count = q->count - 1;
+	}
 	return x;
 }
 
@@ -41,27 +44,14 @@ void printQueue(QueuePtr q) {
 		int j = q->last;
 		int PCBID;
 		printf("\n");
-		for (i = q->first; i < j; i++) {
+		printf("P%d is waiting", getPCBId((*q).q[q->first]));
+		for (i = q->first + 1; i < j; i++) {
 			Queue current_queue = *q;
 			PCBPtr aPCBPtr = current_queue.q[i];
 			PCBID = getPCBId(aPCBPtr);
-			int pcbtype = aPCBPtr->process->proc_type;
-			if (pcbtype == 0) {
-				printf("compute");
-			} else if (pcbtype == 1) {
-				printf("io");
-			}else if (pcbtype == 2) {
-				printf("keyboard");
-			}else if (pcbtype == 3) {
-				printf("producer");
-			}else if (pcbtype==4) {
-				printf("consumer");
-			}
-			printf("%d is waiting, ", PCBID);
+			printf(", P%d is waiting", PCBID);
 		}
-		printf("Idle");
-	} else {
-		printf("Idle");
+		//printf("Idle");
 	}
 }
 /*
