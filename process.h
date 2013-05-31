@@ -2,7 +2,7 @@
  * process.h
  *
  *  Created on: May 25, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #ifndef PROCESS_H_

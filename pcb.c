@@ -1,8 +1,8 @@
 /*
  * pcb.c
- *
+ *  This is a process control block that holds information and a process pointer.
  *  Created on: May 23, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include "process.h"
 #include "pcb.h"
 
-
+//constructs a PCB
 PCBPtr PCBConstructor(int id, int type, int IOCount) {
 	PCBPtr apcb = (PCBPtr) malloc(sizeof(PCBStr));
 	srand(time(NULL));
@@ -30,11 +30,11 @@ PCBPtr PCBConstructor(int id, int type, int IOCount) {
 	apcb->owns = -1;
 	return apcb;
 }
-
+//destructs a pcb
 void PCBDestructor(PCBPtr pcb) {
 	free(pcb);
 }
-
+//gets the pcb ID number.
 int getPCBId(PCBPtr pcb) {
 	return pcb->pid;
 }

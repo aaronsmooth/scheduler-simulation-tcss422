@@ -3,7 +3,7 @@
 
  *
  *  Created on: May 22, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #define QUEUE_SIZE 100

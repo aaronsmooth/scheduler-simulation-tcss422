@@ -1,8 +1,8 @@
 /*
  * mutex.h
- *
+ *  This is the header file for a mutex object.
  *  Created on: May 26, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #ifndef MUTEX_H_
@@ -30,5 +30,7 @@ void mutexEnqueue(mutexPtr, PCBPtr);
 int checkLock(mutexPtr);
 
 void mutexSwitch(mutexPtr, int);
+
+void printMutex(mutexPtr);
 
 #endif /* MUTEX_H_ */
