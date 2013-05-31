@@ -44,3 +44,102 @@ void *Timer(void *this) {
     }
     pthread_exit(NULL);
 }
+
+void InterruptHandler(int interrupt, PCBPtr pcbRequest)
+{
+	switch (interrupt) 
+	{
+	//if i/o request
+	case 1:
+		if(io1Free == True)
+		{			
+			io1Free = False;
+			//Call IO1 and pass pcbRequest
+		}
+		else
+		{
+			if(io2Free == True)
+			{
+				io2Free = False;				
+				//Call IO2 device and pass pcbRequest
+			}
+			else
+			{
+				enqueue(Ioqueue, pcbRequest);
+			}
+		}
+	break;
+	//if keyboard request
+	case 2:	
+		if(keyboardFree == True
+		{
+			enqueue(BlockedQueue, pcbRequest);
+		}
+		else
+		{
+			enqueue(KeyboardQueue, pcbRequest);
+		}
+	break;
+	//if i/o 1 complete
+	case 3:		
+		enqueue(ReadyQueue, pcbRequest)
+
+		if(//Ioqueue is not empty)
+		{
+			PCBPtr pcbPtr = deque(Ioqueue);			
+			//Call IO1 device and pass pcbPtr
+		}
+		else
+		{
+			io1Free = True;
+		}
+	break;
+	//if i/o 2 complete
+	case 4:		
+		enqueue(ReadyQueue, pcbRequest)
+
+		if(/*Ioqueue is not empty*/)
+		{
+			PCBPtr pcbPtr = dequeu(Ioqueue);			
+			//Call IO2 device and pass pcbPtr
+		}
+		else
+		{
+			io2Free = True;
+		}
+	break;
+	//if keyboard complete
+	case 5:
+		PCBPtr pcb = dequeue(BlockedQueue);
+		enque(ReadyQueue, pcb);
+
+		if(/*KeyboardQueue is not empty*/)
+		{
+			PCBPtr pcbPtr  = deque(KeyboardQueue);
+			enqueue(BlockedQueue, pcbPtr);
+
+		}
+	break;
+	//if  producer or consumer request for mutex
+	case 6:
+		if(sharedMemoryFree == True)
+		{
+			sharedMemoryFree = False;
+			//Call Mutex Handler
+		}
+		else
+		{
+			enque(MutexQueue, pcbRequest);
+		}
+	break;
+	//if its a timer request
+	case 7:
+		enque(ReadyQueue, pcbRequest);
+		PCBPtr pcb = dequeue(ReadyQueue);
+		//Pass pcb to CPU
+	break;
+	default:
+		// Code
+	break;
+	}
+}
