@@ -1,8 +1,8 @@
 /*
  * mutex.c
- *
+ *	This is a mutex object that has a queue for those waiting to acquire the mutex.
  *  Created on: May 26, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #include <stdio.h>
@@ -17,7 +17,7 @@ mutexPtr mutexConstructor(int id) {
 	mutexPtr q = (mutexPtr) malloc(sizeof(mutexObj));
 
 	q->mutexID = id;
-	q->ownerID = -1;
+	q->owner = PCBConstructor(-1, 0, 2);
 	q->mutexLocked = 0;
 	q->mutexQueue = QueueConstructor();
 	return q;
@@ -27,33 +27,55 @@ void mutexDestructor(mutexPtr this) {
 	free(this);
 }
 //set the owner of the mutex if the mutex is currently not locked.
-void setOwner(mutexPtr *the_mutex, PCBPtr the_process) {
+void setOwner(mutexPtr the_mutex, PCBPtr the_process) {
 	if (!the_mutex->mutexLocked) {
-		the_mutex->ownerID = the_process->pid;
+		the_mutex->owner = the_process;
 		the_process->owns = the_mutex->mutexID;
 	}
 }
-//change the owner id of the mutex if the queue is not empty
-//sets the pcb to the owner of this mutex, changes state to ready
+//change the owner of the mutex if the queue is not empty to the first PCB in the mutexQueue
+//sets the PCB to the owner of this mutex, changes state to ready
 //returns the id number of the process who now owns this mutex
-int switchOwner(mutexPtr the_mutex) {
+PCBPtr switchOwner(mutexPtr the_mutex) {
 	if (!(the_mutex->mutexQueue->first == the_mutex->mutexQueue->last)) {
 		the_mutex->mutexLocked = 1;
-		the_mutex->ownerID = dequeue(the_mutex->mutexQueue);
+		the_mutex->owner = dequeue(the_mutex->mutexQueue);
 		the_mutex->owner->owns = the_mutex->mutexID;
 		the_mutex->owner->state = 1;
+	} else {
+		the_mutex->mutexLocked = 0;
+		the_mutex->owner = PCBConstructor(-1, 0, 2);
 	}
-	return the_mutex->ownerID;
+	return the_mutex->owner;
 }
 
+//Sets the current PCB's state to blocked
+//Sets the current PCB's waiting on to the mutexID
+//Puts the PCB at the end of the mutex queue.
 void mutexEnqueue(mutexPtr the_mutex, PCBPtr the_process) {
+	the_process->state = 3;
+	the_process->waiting_on = the_mutex->mutexID;
 	enqueue(the_mutex, the_process);
 }
 
+//returns the value of the mutex lock status, 0 = unlocked, 1 = locked.
 int checkLock(mutexPtr the_mutex) {
-	the_mutex->mutexLocked;
+	return the_mutex->mutexLocked;
 }
 
+//changes the current mutex between locked and unlocked by whatever value is passed in. 0 = unlocked, 1 = locked.
 void mutexSwitch(mutexPtr the_mutex, int the_value) {
 	the_mutex->mutexLocked = the_value;
+}
+
+//prints the current mutex's information for the owner and those waiting.
+void printMutex(mutexPtr the_mutex) {
+	if (the_mutex->owner->pid != -1) {
+		printf("\nM%d - P%d owns", the_mutex->mutexID, the_mutex->owner->pid);
+		printQueue(the_mutex->mutexQueue);
+		//int i;
+		//for (i = the_mutex->mutexQueue->first; i < the_mutex->mutexQueue->last; i++) {
+		//	printf(", P%d is waiting", *(the_mutex->mutexQueue)[i]);
+		//}
+	}
 }

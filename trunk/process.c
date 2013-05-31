@@ -2,14 +2,14 @@
  * process.c
  *
  *  Created on: May 25, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include "process.h"
-
+//constructs a process.
 ProcessPtr ProcessConstructor(int type, int numofio) {
 
 	ProcessPtr p = (ProcessPtr) malloc(sizeof(ProcessStr));
@@ -39,7 +39,7 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 
 	return p;
 }
-
+//Destroys a process.
 void ProcessDestructor(ProcessPtr this) {
 	free(this);
 }
