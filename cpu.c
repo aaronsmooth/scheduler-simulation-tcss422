@@ -84,7 +84,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	case 3:		
 		enqueue(ReadyQueue, pcbRequest)
 
-		if(//Ioqueue is not empty)
+		if(Ioqueue->first != Ioqueue->last)
 		{
 			PCBPtr pcbPtr = deque(Ioqueue);			
 			//Call IO1 device and pass pcbPtr
@@ -98,7 +98,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	case 4:		
 		enqueue(ReadyQueue, pcbRequest)
 
-		if(/*Ioqueue is not empty*/)
+		if(Ioqueue->first != Ioqueue->last)
 		{
 			PCBPtr pcbPtr = dequeu(Ioqueue);			
 			//Call IO2 device and pass pcbPtr
@@ -112,8 +112,8 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	case 5:
 		PCBPtr pcb = dequeue(BlockedQueue);
 		enque(ReadyQueue, pcb);
-
-		if(/*KeyboardQueue is not empty*/)
+		
+		if(KeyboardQueue->first != KeyboardQueue->last)
 		{
 			PCBPtr pcbPtr  = deque(KeyboardQueue);
 			enqueue(BlockedQueue, pcbPtr);
@@ -139,7 +139,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		//Pass pcb to CPU
 	break;
 	default:
-		// Code
+		printf("Wrong Input");
 	break;
 	}
 }
