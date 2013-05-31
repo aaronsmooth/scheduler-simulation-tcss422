@@ -51,13 +51,14 @@ void printQueue(QueuePtr q) {
 		int j = q->last;
 		PCBStr PCB = q->q[q->first];
 		printf("\n");
-		printf("P%d is waiting", getPCBId(PCB));
+		printf("P%d", getPCBId(PCB));
 		for (i = q->first + 1; i < j; i++) {
 			Queue current_queue = *q;
 			PCBPtr aPCBPtr = current_queue.q[i];
 			int PCBID = getPCBId(aPCBPtr);
-			printf(", P%d is waiting", PCBID);
+			printf(", P%d", PCBID);
 		}
+		printf(" waiting");
 		//printf("Idle");
 	}
 }
