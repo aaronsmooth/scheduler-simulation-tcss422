@@ -7,6 +7,9 @@
 
 #include <conio.h>
 #include <pthread.h>
+#include "pcb.h"
+#include "cpu.h"
+#include "IODevice.h"
 
 //constructs the IODev as a thread
 IODevPtr IOConstructor(int IOidnum, cpuPtr the_cpu) {
