@@ -54,7 +54,11 @@ void *RunIOProcess(void *args) {
 			if (devptr->owner != NULL) {
 				srand(time(NULL));
 				sleep((rand() % 5) + 1);
-				//interruptCPU(devptr->cpu, IO_INT, devptr->owner);
+				if (devptr->IOID == 1) {
+					InterruptHandler(3, devptr->owner);
+				} else {
+					InterruptHandler(4, devptr->owner);
+				}
 				pthread_cond_wait(&devptr->switchComplete, &devptr->mutex);
 			} else {
 				sleep(1);

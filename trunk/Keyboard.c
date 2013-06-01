@@ -8,6 +8,9 @@ cccc * Keyboard.c
 #ifndef KEYBOARD_C_
 #define KEYBOARD_C_
 #include <pthread.h>
+#include "process.h"
+#include "pcb.h"
+#include "Queue.h"
 #include "Keyboard.h"
 
 KBDevPtr KBDevConstructor() {
@@ -32,10 +35,12 @@ void *KBDevRun(void *args) {
 	KBDevPtr aKB = (KBDevPtr) args;
 
 	while(1) {
-		if (kbhit()) {
-			//interruptCPU();
+		if (aKB->owner != NULL) {
+			if (kbhit()) {
+				InterruptHandler(5, aKB->owner);
+				pthread_cond_wait(&aKB->reset, &aKB->mutex);
+			}
 		}
-		pthread_cond_wait(&aKB->reset, &aKB->mutex);
 	}
 }
 
