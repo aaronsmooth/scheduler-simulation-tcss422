@@ -8,9 +8,16 @@
 
 cpuPtr cpuConstructor() 
 {
+	//create CPU with random count between 1000 and 10000
 	mutexCpu q = (cpuPtr) malloc(sizeof(cpuObj));
 	q->isRunning = FALSE;
 	q->count = random_in_range( 1000, 10000 );
+	
+	//create the ready queue
+	q->readyQueue = QueueConstructor();
+	
+	//create the 
+	
 	pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
