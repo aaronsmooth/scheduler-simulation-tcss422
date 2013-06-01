@@ -12,7 +12,7 @@
 #include "pcb.h"
 
 //constructs a PCB
-PCBPtr PCBConstructor(int id, int type, int IOCount) {
+PCBPtr PCBConstructor(int id, int type, int IOCount, int sharedMem) {
 	PCBPtr apcb = (PCBPtr) malloc(sizeof(PCBStr));
 	srand(time(NULL));
 
@@ -28,6 +28,11 @@ PCBPtr PCBConstructor(int id, int type, int IOCount) {
 	}
 	apcb->waiting_on = 0;
 	apcb->owns = -1;
+	if ((type == 3) || (type == 4)) {
+		apcb->sharedMemInd = sharedMem;
+	} else {
+		apcb->sharedMemInd = -1;
+	}
 	return apcb;
 }
 //destructs a pcb

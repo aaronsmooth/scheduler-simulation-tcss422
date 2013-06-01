@@ -25,6 +25,8 @@ typedef struct {
 			//1 = ready queue, 2 = blocked queue1, 3 = blocked queue2, 4 = mutex queue,
 			//5 = cond variable queue
 	int owns; //which mutex locks it current holds, -1 if it holds none.
+	int sharedMemInd; 	//index to a memory location for producer/consumers to utilize.
+						//-1 for all other process types
 
 } PCBStr;
 
@@ -33,7 +35,8 @@ typedef PCBStr *PCBPtr;
 //constructs a PCB taking an integer value for the process ID,
 //another int for the process type it is and an integer value for the number of I/O
 //process are in the running program from the user.
-PCBPtr PCBConstructor(int, int, int);
+//the last int is the memory index location for producer and consumers
+PCBPtr PCBConstructor(int, int, int, int);
 
 //destructs the PCB
 void PCBDestructor(PCBPtr);

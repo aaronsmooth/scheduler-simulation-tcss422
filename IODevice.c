@@ -18,7 +18,7 @@ IODevPtr IOConstructor(int IOidnum, cpuPtr the_cpu) {
 	devptr->cpu = the_cpu;
 	devptr->IOID = IOidnum;
 	devptr->IOAvailable = 0;
-	devptr->owner = PCBConstructor(-1, 0, 0);
+	devptr->owner = NULL;
 	devptr->switchComplete = PTHREAD_COND_INITIALIZER;
 	devptr->mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -35,6 +35,7 @@ void IODestructor(IODevPtr this) {
 //sets the owner of the IODevice to a pcb, or enqueue's it if another pcb is the owner.
 void IORequest(IODevPtr adevptr, PCBPtr apcb) {
 	if (!adevptr->IOAvailable) {
+		adevptr->IOAvailable = 1;
 		adevptr->owner = apcb;
 		apcb->owns = adevptr->IOID;
 	} else {
@@ -49,13 +50,16 @@ void IORequest(IODevPtr adevptr, PCBPtr apcb) {
 //the cpu that the pcb was successfully moved to the ready queue.
 void *RunIOProcess(void *args) {
 	IODevPtr devptr = (IODevPtr) args;
-	srand(time(NULL));
-	while(1) {
-		sleep((rand() % 5) + 1);
-		//interruptCPU(devptr->cpu, IO_INT, devptr->owner);
-		pthread_cond_wait(&devptr->switchComplete, &devptr->mutex);
+		while(1) {
+			if (devptr->owner != NULL) {
+				srand(time(NULL));
+				sleep((rand() % 5) + 1);
+				//interruptCPU(devptr->cpu, IO_INT, devptr->owner);
+				pthread_cond_wait(&devptr->switchComplete, &devptr->mutex);
+			} else {
+				sleep(1);
+		}
 	}
-
 }
 //prints out the IO ID, the owner, and the waiting queue
 void printIO(IODevPtr theIO) {
