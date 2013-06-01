@@ -12,7 +12,7 @@ typedef struct {
 		int mutexID;
 		PCBPtr owner;
 		int mutexLocked; //0 = unlocked, 1 = locked
-		QueuePtr mutexQueue;
+		PCBPtr waitingPCB;
 } mutexObj;
 
 typedef mutexObj *mutexPtr;

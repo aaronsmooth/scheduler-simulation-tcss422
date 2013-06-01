@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "process.h"
 #include "pcb.h"
+//#include "process.h"
 #include "Queue.h"
 #include "mutex.h"
 
@@ -17,9 +18,10 @@ mutexPtr mutexConstructor(int id) {
 	mutexPtr q = (mutexPtr) malloc(sizeof(mutexObj));
 
 	q->mutexID = id;
-	q->owner = PCBConstructor(-1, 0, 2);
+	q->owner = NULL;
 	q->mutexLocked = 0;
-	q->mutexQueue = QueueConstructor();
+	q->waitingPCB = NULL;
+
 	return q;
 }
 //destroys the mutex
@@ -29,17 +31,20 @@ void mutexDestructor(mutexPtr this) {
 //set the owner of the mutex if the mutex is currently not locked.
 void setOwner(mutexPtr the_mutex, PCBPtr the_process) {
 	if (!the_mutex->mutexLocked) {
+		the_mutex->mutexLocked = 1;
 		the_mutex->owner = the_process;
 		the_process->owns = the_mutex->mutexID;
+	} else {
+		the_mutex->waitingPCB = the_process;
+		the_process->state = 3;
 	}
 }
 //change the owner of the mutex if the queue is not empty to the first PCB in the mutexQueue
 //sets the PCB to the owner of this mutex, changes state to ready
 //returns the id number of the process who now owns this mutex
 PCBPtr switchOwner(mutexPtr the_mutex) {
-	if (!(the_mutex->mutexQueue->first == the_mutex->mutexQueue->last)) {
-		the_mutex->mutexLocked = 1;
-		the_mutex->owner = dequeue(the_mutex->mutexQueue);
+	if (the_mutex->waitingPCB != NULL) {
+		the_mutex->owner = the_mutex->waitingPCB;
 		the_mutex->owner->owns = the_mutex->mutexID;
 		the_mutex->owner->state = 1;
 	} else {

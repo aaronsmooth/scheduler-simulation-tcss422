@@ -1,5 +1,5 @@
 /*
- * Keyboard.c
+cccc * Keyboard.c
  *
  *  Created on: May 30, 2013
  *      Author: Aaron Nelson
@@ -16,8 +16,10 @@ KBDevPtr KBDevConstructor() {
 	keyboard->keyboardFree = 0;
 	keyboard->reset = PTHREAD_COND_INITIALIZER;
 	keyboard->mutex = PTHREAD_MUTEX_INITIALIZER;
+	keyboard->owner = NULL;
 
 	pthread_create(&keyboard->keyboard_thread, NULL, KBDevRun, (void *) keyboard);
+
 	return keyboard;
 }
 
@@ -33,6 +35,7 @@ void *KBDevRun(void *args) {
 		if (kbhit()) {
 			//interruptCPU();
 		}
+		pthread_cond_wait(&aKB->reset, &aKB->mutex);
 	}
 }
 
