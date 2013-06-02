@@ -9,8 +9,6 @@
 #include <stdlib.h>
 #include "process.h"
 #include "pcb.h"
-//#include "process.h"
-#include "Queue.h"
 #include "mutex.h"
 
 //constructs the mutex
@@ -49,7 +47,7 @@ PCBPtr switchOwner(mutexPtr the_mutex) {
 		the_mutex->owner->state = 1;
 	} else {
 		the_mutex->mutexLocked = 0;
-		the_mutex->owner = PCBConstructor(-1, 0, 2);
+		the_mutex->owner = NULL;
 	}
 	return the_mutex->owner;
 }
@@ -77,7 +75,7 @@ void mutexSwitch(mutexPtr the_mutex, int the_value) {
 void printMutex(mutexPtr the_mutex) {
 	if (the_mutex->owner->pid != -1) {
 		printf("\nM%d - P%d owns", the_mutex->mutexID, the_mutex->owner->pid);
-		printQueue(the_mutex->mutexQueue);
+		printf(", P%d is waiting", the_mutex->waitingPCB->pid);
 		//int i;
 		//for (i = the_mutex->mutexQueue->first; i < the_mutex->mutexQueue->last; i++) {
 		//	printf(", P%d is waiting", *(the_mutex->mutexQueue)[i]);

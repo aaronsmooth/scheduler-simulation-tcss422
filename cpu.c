@@ -6,14 +6,16 @@
  */
  #include <stdio.h>
  #include <pthread.h>
- #include "global.h"
+
  #include "process.h"
  #include "pcb.h"
  #include "Queue.h"
- #include "IODevice.h"
- #include "Keyboard.h"
  #include "mutex.h"
+ #include "Keyboard.h"
+ #include "IODevice.h"
  #include "cpu.h"
+ #include "global.h"
+
 
 cpuPtr cpuConstructor(QueuePtr ReadyQ, int memLocations, mutexPtr mutexArray)
 {
@@ -127,7 +129,8 @@ void *CPURun(cpuPtr CPU) {
 
 		if(CPU->runningPCB->process->proc_type == 1)
 		{
-			for(int i; i < CPU->runningPCB->process->no_requests; i++)
+			int i;
+			for(i = 0; i < CPU->runningPCB->process->no_requests; i++)
 			{
 				if(runForCount == CPU->runningPCB->process->requests[i])
 				{
@@ -248,7 +251,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	break;
 	//if its a timer request
 	case 7:
-		enque(CPU->ReadyQueue, pcbRequest);
+		enque(CPU->ReadyQueue, CPU->runningPCB);
 		CPU->runningPCB = dequeue(CPU->ReadyQueue);
 		CPU->runningPCB->state = 0;
 		//Pass pcb to CPU

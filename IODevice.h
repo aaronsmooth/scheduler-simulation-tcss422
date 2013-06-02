@@ -10,9 +10,9 @@
 typedef struct {
 	int IOID;
 	int IOAvailable;	//flag variable. 0 = no current owner, 1 = another pcb owns the IO device.
-	cpuPtr cpu;
 	PCBPtr owner;
 	QueuePtr IOQ;
+	cpuPtr cpu;
 	pthread_t IO_thread;
 	pthread_cond_t switchComplete;  //condition variable that cpu signals to the iodevice that
 									//the pcb was moved to the end of the ready queue.

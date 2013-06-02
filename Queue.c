@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include "process.h"
 #include "pcb.h"
-//#include "process.h"
 #include "Queue.h"
 //constructs an empty queue for holding PCBPtr's
 QueuePtr QueueConstructor() {
