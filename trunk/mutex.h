@@ -23,7 +23,7 @@ void mutexDestructor(mutexPtr);
 
 void setOwner(mutexPtr, PCBPtr);
 
-int switchOwner(mutexPtr);
+mutexPtr switchOwner(mutexPtr);
 
 void mutexEnqueue(mutexPtr, PCBPtr);
 

@@ -7,7 +7,9 @@
 
 #include <conio.h>
 #include <pthread.h>
+#include "process.h"
 #include "pcb.h"
+#include "Queue.h"
 #include "cpu.h"
 #include "IODevice.h"
 
