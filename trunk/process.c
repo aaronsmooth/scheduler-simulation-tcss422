@@ -23,7 +23,13 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 	int requestslist[50];
 	int i;
 	for (i = 0; i < 50; i++) { //request list is full of -1's if there are no actual requests that need to be made.
-		if (type == 1 && numofio > 0) {
+		/*
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		IF THIS IS OF TYPE 1, DOES IT EVER FAIL?
+		I see no case where numofio is decremented when this is of type 1
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		*/
+		if (type == 1 && numofio > 0) { 
 			int j;
 			for(j = 0; j < numofio; j++) { //creates an io request, only creates as many as there are io devices.
 				requestslist[i] = (rand() % 50) + 1;

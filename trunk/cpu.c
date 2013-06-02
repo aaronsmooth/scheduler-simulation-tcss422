@@ -82,9 +82,9 @@ void *Timer(void *this) {
 void *CPURun(cpuPtr CPU) {
 	CPU->runningPCB = dequeue(CPU->ReadyQueue);
 	int interruptOccurred = 0; //0 for interrupt has occurred, 1 for interrupt did not occur
-			int callTimerInt = 1; //0 for calling, 1 for not
+	int callTimerInt = 1; //0 for calling, 1 for not
 
-	while(CPU->count >0) {
+	while(CPU->count > 0) {
 		int runForCount;
 
 		if(interruptOccurred == 0)
@@ -113,20 +113,19 @@ void *CPURun(cpuPtr CPU) {
 			pthread_cond_signal(&CPU->IO1Comp);
 		}
 		if(CPU->IO2Comp) {
-					InterruptHandler(4, CPU->IO2->owner);
-					pthread_cond_signal(&CPU->IO2Comp);
-				}
+			InterruptHandler(4, CPU->IO2->owner);
+			pthread_cond_signal(&CPU->IO2Comp);
+		}
 		/*if(CPU->IOReq) {
-					InterruptHandler(1, CPU->runningPCB);
-				}*/
+			InterruptHandler(1, CPU->runningPCB);
+		}*/
 		if(CPU->KbComp) {
-					InterruptHandler(5, CPU->Keyboard->owner);
-					pthread_cond_signal(&CPU->Keyboard->reset);
-				}
+			InterruptHandler(5, CPU->Keyboard->owner);
+			pthread_cond_signal(&CPU->Keyboard->reset);
+		}
 		if(CPU->KbReq) {
-					InterruptHandler(2, CPU->runningPCB);
-				}
-
+			InterruptHandler(2, CPU->runningPCB);
+		}
 		if(CPU->runningPCB->process->proc_type == 1)
 		{
 			int i;
