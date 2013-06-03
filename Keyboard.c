@@ -10,6 +10,9 @@ cccc * Keyboard.c
 
 #include "global.h"
 #include "Keyboard.h"
+#include <stdio.h>
+#include <stdlib.h>
+//#include <conio.h>
 
 KBDevPtr KBDevConstructor() {
 	KBDevPtr keyboard = (KBDevPtr) malloc(sizeof(KBDev));
@@ -29,18 +32,22 @@ void KBDevDestructor(KBDevPtr this) {
 	free(this);
 }
 
-void KBDevRun(void *args) {
+void *KBDevRun(void *args) {
 	KBDevPtr aKB = (KBDevPtr) args;
 
 	while(1) {
 		if (aKB->owner != NULL) {
-			if (kbhit()) {
+			//if (kbhit()) {
 				KBINT = 1;
 				//InterruptHandler(5, aKB->owner);
 				//pthread_cond_wait(&aKB->reset, &aKB->mutex);
-			}
+			//}
 		}
 	}
 }
 
 #endif /* KEYBOARD_C_ */
+/*
+int main(argc, argv) {
+
+	}*/

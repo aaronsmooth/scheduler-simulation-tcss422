@@ -1,6 +1,6 @@
 /*
  *	cpu.c
- *	
+ *
  *	Created on: 5/29/2013
  *	Author:	Michael Carr
  */
@@ -27,7 +27,6 @@ cpuPtr cpuConstructor() {
 	q->IO2 = IOConstructor(2);
 	q->Keyboard = KBDevConstructor();
 	q->KeyboardQueue = QueueConstructor();
-	q->Mutex = *mutex;
 	q->runCount = 0;
 	q->runningPCB = NULL;
 	//create the ready queue
@@ -38,24 +37,24 @@ cpuPtr cpuConstructor() {
 	//q->mutex = PTHREAD_MUTEX_INITIALIZER;
 	q->count = 1000;
 	aCPU = q;
-	//create the 
-	
+	//create the
+
 
 	pthread_create(&q->cpu_thread, NULL, CPURun, (void *)q);
    // pthread_attr_destroy(&attr);
 	return q;
 }
 
-/* Would like a semi-open interval [min, max) */
-/*int random_in_range (unsigned int min, unsigned int max)
+/* Would like a semi-open interval [min, max)
+int random_in_range (unsigned int min, unsigned int max)
 {
-  int base_random = rand(); /* in [0, RAND_MAX]
+  int base_random = rand(); in [0, RAND_MAX]
   if (RAND_MAX == base_random) return random_in_range(min, max);
-  /* now guaranteed to be in [0, RAND_MAX)
+   now guaranteed to be in [0, RAND_MAX)
   int range       = max - min,
       remainder   = RAND_MAX % range,
       bucket      = RAND_MAX / range;
-  /* There are range buckets, plus one smaller interval
+   There are range buckets, plus one smaller interval
      within remainder of RAND_MAX
   if (base_random < RAND_MAX - remainder) {
     return min + base_random/bucket;
@@ -73,7 +72,14 @@ void *Timer(void *this) {
     pthread_exit(NULL);
 }*/
 
-void CPURun(cpuPtr CPU) {
+void *CPURun(void *args) {
+	cpuPtr CPU = (cpuPtr) args;
+	//initialize the mutex array
+	int m;
+	for (m = 0; m < MUTEXARRSIZE; m++) {
+		mutex[m] = PTHREAD_MUTEX_INITIALIZER;
+		MutexMem[m] = mutexConstructor(m);
+	}
 	//create 2 IO devices as separate threads
 	pthread_create(&(CPU->IO1_thread), NULL, RunIOProcess, (void *) CPU->IO1);
 	pthread_create(&(CPU->IO2_thread), NULL, RunIOProcess, (void *) CPU->IO2);
@@ -167,14 +173,14 @@ void CPURun(cpuPtr CPU) {
 
 void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 {
-	switch (interrupt) 
+	switch (interrupt)
 	{
 	//if i/o request
 	case 1:
 		if(aCPU->IO1->IOAvailable == 0)
-		{			
+		{
 			IORequest(aCPU->IO1, aCPU->runningPCB);
-			aCPU->runningPCB = deque(aCPU->ReadyQueue);
+			aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
 			aCPU->runningPCB->state = 0;
 			//Call IO1 and pass pcbRequest
 		}
@@ -185,7 +191,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 				//io2Free = False;
 				//Call IO2 device and pass pcbRequest
 				IORequest(aCPU->IO2, aCPU->runningPCB);
-				aCPU->runningPCB = deque(aCPU->ReadyQueue);
+				aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
 				aCPU->runningPCB->state = 0;
 			}
 			else
@@ -195,13 +201,13 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		}
 	break;
 	//if keyboard request
-	case 2:	
+	case 2:
 		if(aCPU->Keyboard->owner == NULL)
 		{
 			//enqueue(BlockedQueue, pcbRequest);
 			aCPU->Keyboard->owner = aCPU->runningPCB;
 			aCPU->runningPCB->state = 3;
-			aCPU->runningPCB = deque(aCPU->ReadyQueue);
+			aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
 		}
 		else
 		{
@@ -215,19 +221,19 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 
 		if(aCPU->IoQueue->count != 0)
 		{
-			PCBPtr pcbPtr = deque(aCPU->IoQueue);
+			PCBPtr pcbPtr = dequeue(aCPU->IoQueue);
 			IORequest(aCPU->IO1, pcbPtr);
 			//Call IO1 device and pass pcbPtr
 		}
 	break;
 	//if i/o 2 complete
-	case 4:		
+	case 4:
 		pcbRequest->state = 1;
 		enqueue(aCPU->ReadyQueue, pcbRequest);
 
 		if(aCPU->IoQueue->count != 0)
 		{
-			PCBPtr pcbPtr = deque(aCPU->IoQueue);
+			PCBPtr pcbPtr = dequeue(aCPU->IoQueue);
 			IORequest(aCPU->IO2, pcbPtr);
 			//Call IO1 device and pass pcbPtr
 		}
@@ -235,28 +241,28 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if keyboard complete
 	case 5:
 		//PCBPtr pcb = dequeue(BlockedQueue);
-		enque(aCPU->ReadyQueue, pcbRequest);
-		
+		enqueue(aCPU->ReadyQueue, pcbRequest);
+
 		if(aCPU->KeyboardQueue->count != 0)
 		{
-			PCBPtr CPUKbOwner  = deque(aCPU->KeyboardQueue);
+			PCBPtr CPUKbOwner  = dequeue(aCPU->KeyboardQueue);
 			aCPU->Keyboard->owner = CPUKbOwner;
 		}
 	break;
 	//if  producer or consumer request for mutex
 	case 6:
-		if (pthread_mutex_trylock(&mutex[pcbRequest->sharedMemInd]) == 0) {
-			SetOwner((aCPU->Mutex)[aCPU->runningPCB->sharedMemInd], aCPU->runningPCB);
+		if (pthread_mutex_trylock(&(mutex[pcbRequest->sharedMemInd])) == 0) {
+			setOwner(MutexMem[aCPU->runningPCB->sharedMemInd], aCPU->runningPCB);
 			aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
 			aCPU->runningPCB->state = 0;
 		} else {
 			pcbRequest->state = 3;
-			((mutex[aCPU->runningPCB->sharedMemInd])->waitingPCB) = pcbRequest;
+			((MutexMem[aCPU->runningPCB->sharedMemInd])->waitingPCB) = pcbRequest;
 		}
 	break;
 	//if its a timer request
 	case 7:
-		enque(aCPU->ReadyQueue, aCPU->runningPCB);
+		enqueue(aCPU->ReadyQueue, aCPU->runningPCB);
 		aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
 		aCPU->runningPCB->state = 0;
 		//Pass pcb to CPU
@@ -266,3 +272,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	break;
 	}
 }
+/*
+int main(argc, argv) {
+
+	}*/

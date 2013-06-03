@@ -5,6 +5,7 @@
  *      Author: Aaron Nelson
  */
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -115,14 +116,14 @@ void *RunIOProcess(void *args) {
 		while(1) {
 			if (devptr->owner != NULL) {
 				srand(time(NULL));
-				sleep((rand() % 5) + 1);
+				Sleep((rand() % 5000) + 1);
 				if (devptr->IOID == 1) {
 					IO1INT = 1;
 				} else {
 					IO2INT = 1;
 				}
 			} else {
-				sleep(1);
+				Sleep(1000);
 		}
 	}
 }
@@ -211,5 +212,5 @@ int main(argc, argv) {
 	for(i = 0; i < newProcStr.no_requests; i++) {
 		printf(" %d ", (newProcStr.requests)[i]);
 	}
-}
-*/
+}*/
+

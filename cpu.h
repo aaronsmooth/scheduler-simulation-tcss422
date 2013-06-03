@@ -1,6 +1,6 @@
 /*
  *	cpu.h
- *	
+ *
  *	Created on: 5/29/2013
  *	Author:	Aaron Nelson, Ankita Tiku, Michael Carr
  */
@@ -30,12 +30,12 @@ typedef struct {
 	QueuePtr ReadyQueue, KeyboardQueue, IoQueue; //Queues for respective structures
 
 
-	mutexPtr Mutex; //Array of Mutex locks
+	//mutexPtr Mutex; //Array of Mutex structs that hold information about each mutex lock
 	KBDevPtr Keyboard; //Keyboard structure
 	IODevPtr IO1; //IO Device 1 structure
 	IODevPtr IO2; //IO Device 2 structure
 
-	pthread_mutex_t memoryMutexes[MUTEXARRSIZE]; //an array of mutexes for the p|c memory accessing.
+	//pthread_mutex_t memoryMutexes[MUTEXARRSIZE]; //an array of mutexes for the p|c memory accessing.
 	pthread_t cpu_thread; //cpu thread
 	pthread_t IO1_thread; //IO1 thread
 	pthread_t IO2_thread; //IO2 thread
@@ -52,7 +52,7 @@ typedef cpuObj *cpuPtr;
 
 cpuPtr cpuConstructor();
 
-void CPURun(cpuPtr);
+void *CPURun(void *);
 
 void InterruptHandler(int, PCBPtr);
 

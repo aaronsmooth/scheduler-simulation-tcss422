@@ -28,6 +28,6 @@ KBDevPtr KBDevConstructor();
 void KBDevDestructor(KBDevPtr);
 
 //runs a loop that detects when a key is pressed on the keyboard and signals to the cpu when it happens.
-void KBDevRun(void *);
+void *KBDevRun(void *);
 
 #endif /* KEYBOARD_H_ */

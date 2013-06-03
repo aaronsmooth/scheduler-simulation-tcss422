@@ -5,6 +5,7 @@
 #include "process.h"
 #include "mutex.h"
 #include "cpu.h"
+#include <pthread.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -29,6 +30,7 @@ int processidcount;
 int calcproc_count;
 
 //cpuPtr CPU;
-mutexPtr mutex[MUTEXARRSIZE];
+mutexPtr MutexMem[MUTEXARRSIZE]; //Array of Mutex structs that hold information about each mutex lock
+pthread_mutex_t mutex[MUTEXARRSIZE];
 QueuePtr ReadyQPtr;
 int sharedMemory[SHAREDMEMLOC];
