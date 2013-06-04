@@ -42,9 +42,9 @@ void switchOwner(mutexPtr the_mutex) {
 	if (the_mutex->waitingPCB != NULL) {
 		the_mutex->owner = the_mutex->waitingPCB;
 		the_mutex->owner->owns = the_mutex->mutexID;
-		the_mutex->owner->state = 1;
+		//the_mutex->owner->state = 1;
 	} else {
-		the_mutex->mutexLocked = 0;
+		//the_mutex->mutexLocked = 0;
 		the_mutex->owner = NULL;
 	}
 	//return the_mutex->owner->pid;
