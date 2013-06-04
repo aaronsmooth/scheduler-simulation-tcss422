@@ -31,7 +31,7 @@ cpuPtr cpuConstructor() {
 	q->runCount = 0;
 	q->runningPCB = NULL;
 	//create the ready queue
-	q->ReadyQueue = ReadyQPtr;
+	//q->ReadyQueue = ReadyQPtr;
 	//q->switchcomplete = PTHREAD_COND_INITIALIZER;
 	//q->timer = PTHREAD_COND_INITIALIZER;
 	//q->keyboarddone = PTHREAD_COND_INITIALIZER;
@@ -86,7 +86,7 @@ void *Timer(void *this) {
 }*/
 
 void *CPURun(void *args) {
-	cpuPtr CPU = (cpuPtr) args;
+	//cpuPtr CPU = (cpuPtr) args;
 
 	int i;
 	for(i = 0; i < pcproc_count; i++) {
@@ -95,10 +95,10 @@ void *CPURun(void *args) {
 	}
 	//put the first PCB as running
 
-	if (CPU->runningPCB == NULL) {
-		CPU->runningPCB = dequeue(CPU->ReadyQueue);
-		CPU->runningPCB->state = 0;
-		printf("\nP%d is Running", CPU->runningPCB->pid);
+	if (aCPU->runningPCB == NULL) {
+		aCPU->runningPCB = dequeue(ReadyQPtr);
+		aCPU->runningPCB->state = 0;
+		printf("\nP%d is Running", aCPU->runningPCB->pid);
 	}
 
 	int interruptOccurred = (IO1INT || IO2INT || KBINT || TIMERINT); //1 for interrupt has occurred, 0 for interrupt did not occur
@@ -106,7 +106,7 @@ void *CPURun(void *args) {
 	//printf("\nCPU count = %d", CPU->count);
 	while(aCPU->count >0) {
 		//printf("\nWhile Loop1 Starting");
-		printf("\nCPU count = %d", CPU->count);
+		printf("\nCPU count = %d", aCPU->count);
 		runForCount = aCPU->runningPCB->count;
 		if(interruptOccurred == 0) {
 			if(aCPU->runningPCB->curr_count > WAIT_TIME) {
@@ -117,8 +117,9 @@ void *CPURun(void *args) {
 		}
 
 		while(runForCount > 0) {
+
 			runForCount--;
-			printf("\nCPU count = %d", aCPU->count);
+			printf("\nrunning count = %d", runForCount);
 			int processType = aCPU->runningPCB->process->proc_type;
 			if (interruptOccurred) {
 				if(TIMERINT) {
@@ -138,8 +139,11 @@ void *CPURun(void *args) {
 
 				if (runForCount == 0) {
 					aCPU->runningPCB->state = 1;
-					enqueue(aCPU->ReadyQueue, aCPU->runningPCB);
-					aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
+					printf("\nCompute Bound Switch");
+					printf("\nP%d moved to Ready Queue", aCPU->runningPCB->pid);
+					enqueue(ReadyQPtr, aCPU->runningPCB);
+					aCPU->runningPCB = dequeue(ReadyQPtr);
+					printf("\nP%d is running", aCPU->runningPCB->pid);
 
 				}
 				//runForCount = 0;
@@ -158,8 +162,12 @@ void *CPURun(void *args) {
 				}*/
 
 			} else if(processType == 1) {
+				printf("\nIO Bound PCB");
 				int i;
 				for(i = 0; i < aCPU->runningPCB->process->no_requests; i++) {
+					printf("\nChecking List");
+					//printf("\nindex value = %d ", i);
+					printf("\narray value @%d = %d", i, aCPU->runningPCB->process->requests[0]);
 					if(runForCount == aCPU->runningPCB->process->requests[i]) {
 						printf("\nInterrupt Request made");
 						aCPU->runningPCB->state = 2;
@@ -169,26 +177,35 @@ void *CPURun(void *args) {
 					}
 				}
 			} else if(processType == 2) {
+				printf("\nKB Bound Switch");
 				InterruptHandler( 2, aCPU->runningPCB);
 
 			} else if ((processType == 3) || (processType == 4)) {
+				printf("\nP & C Bound Switch");
 				if(processType == 3) {
 					printf("\nA producer thread was created");
-					pthread_create(&aCPU->producer_thread, NULL, incCount, (void *) MutexMem[aCPU->runningPCB->sharedMemInd]);
+					pthread_create(&aCPU->producer_thread[aCPU->runningPCB->sharedMemInd], NULL, incCount, (void *) aCPU->runningPCB);
 				} else if (processType == 4) {
 					printf("\nA consumer thread was created");
-					pthread_create(&aCPU->consumer_thread, NULL, resetCount, (void *) MutexMem[aCPU->runningPCB->sharedMemInd]);
+					pthread_create(&aCPU->consumer_thread[aCPU->runningPCB->sharedMemInd], NULL, resetCount, (void *) aCPU->runningPCB);
 				}
+			printf("\nSwitching");
 			aCPU->runningPCB->state = 1;
-			enqueue(aCPU->ReadyQueue, aCPU->runningPCB);
-			aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
-
-
+			enqueue(ReadyQPtr, aCPU->runningPCB);
+			aCPU->runningPCB = dequeue(ReadyQPtr);
+			printf("\nP%d is running", aCPU->runningPCB->pid);
 			}
-			CPU->count--;
+
+
+			aCPU->count--;
+			if (aCPU->count == 0) {
+				pthread_exit(NULL);
+			}
 		}
 		//CPU->count--;
 	}
+	//pthread_exit(NULL);
+
 }
 
 void InterruptHandler(int interrupt, PCBPtr pcbRequest)
@@ -215,7 +232,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		else {
 			enqueue(aCPU->IoQueue, aCPU->runningPCB);
 		}
-		aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
+		aCPU->runningPCB = dequeue(ReadyQPtr);
 		aCPU->runningPCB->state = 0;
 
 	break;
@@ -233,7 +250,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 			aCPU->runningPCB->state = 3;
 			aCPU->Keyboard->keyboardFree = 1;
 		}
-		aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
+		aCPU->runningPCB = dequeue(ReadyQPtr);
 		aCPU->runningPCB->state = 0;
 		printf("\nP%d is now running", aCPU->runningPCB->pid);
 	break;
@@ -243,7 +260,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		printf("\nI/O1 complete");
 		printf("\nP%d was moved to the ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
-		enqueue(aCPU->ReadyQueue, pcbRequest);
+		enqueue(ReadyQPtr, pcbRequest);
 
 		if(aCPU->IoQueue->count != 0) {
 			PCBPtr pcbPtr = dequeue(aCPU->IoQueue);
@@ -262,7 +279,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		printf("\nI/O2 complete");
 		printf("\nP%d was moved to the ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
-		enqueue(aCPU->ReadyQueue, pcbRequest);
+		enqueue(ReadyQPtr, pcbRequest);
 
 		if(aCPU->IoQueue->count != 0) {
 			PCBPtr pcbPtr = dequeue(aCPU->IoQueue);
@@ -281,7 +298,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		KBINT = 0;
 		printf("\nA Key was pressed");
 		//PCBPtr pcb = dequeue(BlockedQueue);
-		enqueue(aCPU->ReadyQueue, pcbRequest);
+		enqueue(ReadyQPtr, pcbRequest);
 
 		if(aCPU->Keyboard->Blocked->count != 0) {
 			aCPU->Keyboard->owner = dequeue(aCPU->Keyboard->Blocked);
@@ -317,8 +334,8 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		printf("\nTimer Interrupt Occurred");
 		printf("\nP%d was moved to the Ready Queue", aCPU->runningPCB->pid);
 		aCPU->runningPCB->state = 1;
-		enqueue(aCPU->ReadyQueue, aCPU->runningPCB);
-		aCPU->runningPCB = dequeue(aCPU->ReadyQueue);
+		enqueue(ReadyQPtr, aCPU->runningPCB);
+		aCPU->runningPCB = dequeue(ReadyQPtr);
 		aCPU->runningPCB->state = 0;
 		printf("\nP%d is now Running", aCPU->runningPCB->pid);
 		//Pass pcb to CPU
@@ -331,45 +348,50 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 //producer thread
 void *incCount(void *args) {
 	//printf("\n**producer thread**");
-	mutexPtr mux = (mutexPtr) args;
+	PCBPtr currentP = (PCBPtr) args;
 	printf("\np1");
-	if (pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]) != 0) {
-		printf("\np2");
-		//mux->waitingPCB = aCPU->runningPCB;
-		mux->waitingPCB = aCPU->runningPCB;
-		pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-	}
+	//int result = pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]);
+	//printf("\n%d", result);
+	//if (result != 0) {
+	//	printf("\np2");
+	//	//mux->waitingPCB = aCPU->runningPCB;
+	//	mux->waitingPCB = aCPU->runningPCB;
+	printf("\nMutex location = %d", currentP->sharedMemInd);
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//}
 	printf("\np3");
 	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-	switchOwner(mux);
-	mux->owner = aCPU->runningPCB;
+	switchOwner(MutexMem[currentP->sharedMemInd]);
+	MutexMem[currentP->sharedMemInd]->owner = currentP;
 	printf("\n**producer thread**");
-	sharedMemory[mux->owner->sharedMemInd]++;				//critical region where memory value is changed
-	pthread_cond_signal(&condVar[mux->owner->sharedMemInd]);
-	mux->owner = NULL;
-	pthread_mutex_unlock(&mutex[mux->owner->sharedMemInd]);
+	sharedMemory[currentP->sharedMemInd]++;				//critical region where memory value is changed
+	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+	printf("\nproduer complete");
+	MutexMem[currentP->sharedMemInd]->owner = NULL;
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 	pthread_exit(NULL);
 }
 //consumer thread
 void *resetCount(void *args) {
 	printf("\n**consumer thread**");
-	mutexPtr mux = (mutexPtr) args;
-	if (pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]) != 0) {
+	PCBPtr currentP = (PCBPtr) args;
+	//if (pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]) != 0) {
 		//mux->waitingPCB = aCPU->runningPCB;
 		printf("\nc1");
-		mux->waitingPCB = aCPU->runningPCB;
-		pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-	}
-	switchOwner(mux);
+	//	mux->waitingPCB = aCPU->runningPCB;
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//}
+	switchOwner(MutexMem[currentP->sharedMemInd]);
 	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
 	printf("\nc2");
-	mux->owner = aCPU->runningPCB;
-	while(sharedMemory[mux->owner->sharedMemInd] == 0) {
-		pthread_cond_wait(&condVar[mux->owner->sharedMemInd], &mutex[mux->owner->sharedMemInd]);
-		sharedMemory[mux->owner->sharedMemInd] = 0;
+	MutexMem[currentP->sharedMemInd]->owner = currentP;
+	while(sharedMemory[currentP->sharedMemInd] == 0) {
+		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+		sharedMemory[currentP->sharedMemInd] = 0;
 	}
-	mux->owner = NULL;
-	pthread_mutex_unlock(&mutex[mux->owner->sharedMemInd]);
+	printf("\nConsumer complete");
+	MutexMem[currentP->sharedMemInd]->owner = NULL;
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 	pthread_exit(NULL);
 }
 /*

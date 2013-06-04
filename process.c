@@ -30,7 +30,8 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 		if (type == 1 && numofio > 0) {
 			int j;
 			for(j = 0; j < numofio; j++) { //creates an io request, only creates as many as there are io devices.
-				requestslist[i] = (rand() % WAIT_TIME) + 1;
+				requestslist[i] = (rand() % 12);
+				printf("\nCreating LIst: %d", requestslist[i]);
 			}
 		} else {
 			int k;

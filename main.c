@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
 	}
 	for (i = 0; i < ioproc_count; i++) {
 		PCBPtr b = PCBConstructor(processidcount, 1, 2, -1);
+		printf("\nfirst io list value: %d", b->process->requests[0]);
 		enqueue(ReadyQPtr, b);
 		processidcount++;
 	}
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]) {
 	printQueue(ReadyQPtr);
 	//printf("\nProcess Count2");
 	cpuPtr cpu = cpuConstructor();
-	printf("\nCPU Construct Complete");
+	printf("\nCPU Program Complete");
 
 	//CPURun(cpu);
 

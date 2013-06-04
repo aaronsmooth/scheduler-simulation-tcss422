@@ -40,8 +40,8 @@ typedef struct {
 	pthread_t IO1_thread; //IO1 thread
 	pthread_t IO2_thread; //IO2 thread
 	pthread_t Keyboard_thread; //keyboard thread
-	pthread_t producer_thread; //producer
-	pthread_t consumer_thread; //consumer
+	pthread_t producer_thread[MUTEXARRSIZE]; //producer
+	pthread_t consumer_thread[MUTEXARRSIZE]; //consumer
 	//pthread_cond_t timer; //???????
 	//pthread_cond_t keyboarddone; //???????
 	//pthread_cond_t switchcomplete; //???????
