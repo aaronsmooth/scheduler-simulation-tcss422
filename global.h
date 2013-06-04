@@ -9,7 +9,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define WAIT_TIME 30
+#define WAIT_TIME 30	//the Quanta for our CPU, every process gets to run 30 loops in the CPu.
 #define SHAREDMEMLOC 50
 #define MUTEXARRSIZE 60
 #define RUNNING 0

@@ -21,6 +21,7 @@ KBDevPtr KBDevConstructor() {
 	//keyboard->reset = PTHREAD_COND_INITIALIZER;
 	//keyboard->mutex = PTHREAD_MUTEX_INITIALIZER;
 	keyboard->owner = NULL;
+	keyboard->Blocked = QueueConstructor();
 
 	//pthread_create(&keyboard->keyboard_thread, NULL, KBDevRun, (void *) keyboard);
 

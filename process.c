@@ -30,7 +30,7 @@ ProcessPtr ProcessConstructor(int type, int numofio) {
 		if (type == 1 && numofio > 0) {
 			int j;
 			for(j = 0; j < numofio; j++) { //creates an io request, only creates as many as there are io devices.
-				requestslist[i] = (rand() % 50) + 1;
+				requestslist[i] = (rand() % WAIT_TIME) + 1;
 			}
 		} else {
 			int k;
@@ -116,14 +116,14 @@ void *RunIOProcess(void *args) {
 		while(1) {
 			if (devptr->owner != NULL) {
 				srand(time(NULL));
-				Sleep((rand() % 5000) + 1);
+				Sleep((rand() % 50) + 1);
 				if (devptr->IOID == 1) {
 					IO1INT = 1;
 				} else {
 					IO2INT = 1;
 				}
 			} else {
-				Sleep(1000);
+				Sleep(10);
 		}
 	}
 }
@@ -176,6 +176,7 @@ void printQueue(QueuePtr q) {
 		printf(" waiting");
 		//printf("Idle");
 	}
+	//printf("Queue Complete");
 }
 
 //destructs a pcb

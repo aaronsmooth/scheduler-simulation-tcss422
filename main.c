@@ -6,9 +6,9 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "cpu.h"
 #include "process.h"
 #include "global.h"
+#include "cpu.h"
 //#include <conio.h>
 
 int main(int argc, char *argv[]) {
@@ -21,11 +21,11 @@ int main(int argc, char *argv[]) {
 		pcproc_count = atoi(argv[8]);
 		calcproc_count = process_count - (kproc_count + ioproc_count + pcproc_count);
 	} else {
-		process_count = 10;
-		kproc_count = 2;
-		ioproc_count = 2;
-		pcproc_count = 2;
-		calcproc_count = 4;
+		process_count = 12;
+		kproc_count = 3;
+		ioproc_count = 3;
+		pcproc_count = 3;
+		calcproc_count = 3;
 	}
 
 	ReadyQPtr = QueueConstructor();
@@ -34,11 +34,6 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < kproc_count; i++) {
 		PCBPtr a = PCBConstructor(processidcount, 2, 2, -1);
 		enqueue(ReadyQPtr, a);
-		processidcount++;
-	}
-	for (i = 0; i < ioproc_count; i++) {
-		PCBPtr b = PCBConstructor(processidcount, 1, 2, -1);
-		enqueue(ReadyQPtr, b);
 		processidcount++;
 	}
 	for (i = 0; i < pcproc_count; i++) {
@@ -54,21 +49,26 @@ int main(int argc, char *argv[]) {
 		enqueue(ReadyQPtr, e);
 		processidcount++;
 	}
-
+	for (i = 0; i < ioproc_count; i++) {
+		PCBPtr b = PCBConstructor(processidcount, 1, 2, -1);
+		enqueue(ReadyQPtr, b);
+		processidcount++;
+	}
 	for (i = 0; i < pcproc_count; i++) {
 		sharedMemory[i] = 0;
 	}
-	printf("\nProcess Count %d", process_count);
-	printQueue(ReadyQPtr);
-	printf("\nProcess Count2");
-	cpuPtr cpu = cpuConstructor();
-
 	//initialize interrupt flags
 	IO1INT = 0;
 	IO2INT = 0;
 	KBINT = 0;
 	TIMERINT = 0;
-	CPURun(cpu);
+	//printf("\nProcess Count %d", process_count);
+	printQueue(ReadyQPtr);
+	//printf("\nProcess Count2");
+	cpuPtr cpu = cpuConstructor();
+	printf("\nCPU Construct Complete");
+
+	//CPURun(cpu);
 
 	return 0;
 }

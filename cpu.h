@@ -27,7 +27,7 @@ typedef struct {
 	int memoryLocations; //Memory location for P|C data
 	PCBPtr runningPCB; //the currently running PCB in the CPU
 	QueuePtr schedulerQueue;
-	QueuePtr ReadyQueue, KeyboardQueue, IoQueue; //Queues for respective structures
+	QueuePtr ReadyQueue, IoQueue; //Queues for respective structures
 
 
 	//mutexPtr Mutex; //Array of Mutex structs that hold information about each mutex lock
