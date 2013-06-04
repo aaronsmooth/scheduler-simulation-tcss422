@@ -32,5 +32,6 @@ int calcproc_count;
 //cpuPtr CPU;
 mutexPtr MutexMem[MUTEXARRSIZE]; //Array of Mutex structs that hold information about each mutex lock
 pthread_mutex_t mutex[MUTEXARRSIZE];
+pthread_cond_t condVar[MUTEXARRSIZE];
 QueuePtr ReadyQPtr;
 int sharedMemory[SHAREDMEMLOC];

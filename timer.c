@@ -13,10 +13,11 @@
  *      Author: Aaron Nelson
  */
 
+
 #include <windows.h>
 #include "timer.h"
 
-#define QUANTA 1
+#define QUANTA 3000
 
 TimerPtr TimerConstructor() {
 	TimerPtr theTimer = (TimerPtr) malloc(sizeof(Timer));
@@ -37,12 +38,12 @@ void *RunTimer(void *arg) {
 	TimerPtr atimer = (TimerPtr) arg;
 
 	while(1) {
-		if (TIMERINT == 0) {
+		//if (TIMERINT == 0) {
 			Sleep(QUANTA);
 			TIMERINT = 1;
 			//InterruptHandler(7, NULL);
 			//pthread_cond_wait(&atimer->reset, &atimer->mut);
-		}
+		//}
 	}
 }
 /*

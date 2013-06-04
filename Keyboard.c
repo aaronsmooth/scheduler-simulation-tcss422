@@ -9,6 +9,8 @@ cccc * Keyboard.c
 #define KEYBOARD_C_
 
 #include "global.h"
+//#include "graphics.h"
+#include <windows.h>
 #include "Keyboard.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,15 +38,16 @@ void KBDevDestructor(KBDevPtr this) {
 void *KBDevRun(void *args) {
 	KBDevPtr aKB = (KBDevPtr) args;
 
-	while(1) {
-		if (aKB->owner != NULL) {
-			//if (kbhit()) {
-				KBINT = 1;
-				//InterruptHandler(5, aKB->owner);
-				//pthread_cond_wait(&aKB->reset, &aKB->mutex);
-			//}
+	int loopctrl = 1;
+	while(loopctrl) {
+		char c = getchar();
+		while(c != '\n') {
+			c = getchar();
 		}
+		printf("\nA key was pressed");
+		loopctrl = 0;
 	}
+
 }
 
 #endif /* KEYBOARD_C_ */

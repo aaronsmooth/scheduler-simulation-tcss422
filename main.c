@@ -12,16 +12,16 @@
 //#include <conio.h>
 
 int main(int argc, char *argv[]) {
-	printf("working");
+	//printf("working");
 
 	if (argc == 9) {
 		process_count = atoi(argv[2]);
 		kproc_count = atoi(argv[4]);
 		ioproc_count = atoi(argv[6]);
 		pcproc_count = atoi(argv[8]);
-		calcproc_count = process_count - (kproc_count + ioproc_count + pcproc_count);
+		calcproc_count = process_count - (kproc_count + ioproc_count + (pcproc_count * 2));
 	} else {
-		process_count = 12;
+		process_count = 15;
 		kproc_count = 3;
 		ioproc_count = 3;
 		pcproc_count = 3;
