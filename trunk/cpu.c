@@ -214,7 +214,7 @@ void *CPURun(void *args)
 			KBDevDestructor(aCPU->Keyboard);
 			pthread_exit(NULL);
 			}
-		printf("\nEscape Inner Loop");
+		//printf("\nEscape Inner Loop");
 		}
 	}
 }
@@ -262,7 +262,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if i/o 1 complete
 	case 3:
 		IO1INT = 0;
-		printf("\nP%d's I/O interrupt complete");
+		printf("\nP%d's I/O interrupt complete", pcbRequest->pid);
 		printf("\nP%d moved from I/O1 to ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
 		enqueue(ReadyQPtr, pcbRequest);
