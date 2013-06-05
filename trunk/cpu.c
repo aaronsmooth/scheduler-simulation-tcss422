@@ -66,7 +66,7 @@ void *CPURun(void *args)
 		printf("\n\n\nP%d - running", aCPU->runningPCB->pid);
 		
 		if (aCPU->IO1->owner != NULL) printf("\nI/O1 - P%d", aCPU->IO1->owner->pid);
-		if (aCPU->IO1->owner != NULL) printf("\nI/O2 - P%d", aCPU->IO2->owner->pid);
+		if (aCPU->IO2->owner != NULL) printf("\nI/O2 - P%d", aCPU->IO2->owner->pid);
 		
 		if (aCPU->IoQueue->count > 0) 
 		{
@@ -145,22 +145,28 @@ void *CPURun(void *args)
 			} 
 			else if (processType == 1) 
 			{
+				int flag = 0;
 				int i;
-				for(i = 0; i < aCPU->runningPCB->process->no_requests; i++) 
+				for(; flag != 1;) 
 				{
-					if ( (rand() % 10) == (rand() % 10) ) 
+					if ( (rand() % 6) == 5 ) 
 					{
-						aCPU->runningPCB->state = 2;
-						aCPU->runningPCB->curr_count = runForCount;
+						aCPU->runningPCB->curr_count = /*aCPU->runningPCB->curr_count -*/ runForCount;
 						InterruptHandler( 1, aCPU->runningPCB);
-						runForCount = 0;
+						flag = 1;
 					}
 					else if ( runForCount == 1 )
 					{
 						TIMERINT = 1;
+						flag = 1;
 					}
-					
+					if ( flag == 0 ) 
+					{
+					runForCount--;
+					aCPU->count--;
+					}
 				}
+				runForCount = 0;
 			} 
 			else if (processType == 2) 
 			{
@@ -188,8 +194,8 @@ void *CPURun(void *args)
 			sleep(1);
 			if (aCPU->count == 0) 
 			{
-			KBDevDestructor(aCPU->Keyboard);
-			pthread_exit(NULL);
+				KBDevDestructor(aCPU->Keyboard);
+				pthread_exit(NULL);
 			}
 		}
 	}
@@ -216,7 +222,6 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		aCPU->runningPCB = dequeue(ReadyQPtr);
 		aCPU->runningPCB->state = 0;
 		printf("\nP%d selected from ready queue", aCPU->runningPCB->pid);
-
 	break;
 	//if keyboard request
 	case 2:
@@ -238,9 +243,9 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if i/o 1 complete
 	case 3:
 		IO1INT = 0;
-		printf("P%d's I/O interrupt complete");
-		printf("\nP%d moved from I/O1 to ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
+		printf("\nP%d's I/O interrupt complete", pcbRequest->pid);
+		printf("\nP%d moved from I/O1 to ready queue", pcbRequest->pid);
 		enqueue(ReadyQPtr, pcbRequest);
 
 		if(aCPU->IoQueue->count != 0 && aCPU->IoQueue->first != aCPU->IoQueue->last ) {
@@ -256,9 +261,9 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if i/o 2 complete
 	case 4:
 		IO2INT = 0;
-		printf("P%d's I/O interrupt complete");
-		printf("\nP%d moved from I/O2 to ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
+		printf("\nP%d's I/O interrupt complete", pcbRequest->pid);
+		printf("\nP%d moved from I/O2 to ready queue", pcbRequest->pid);
 		enqueue(ReadyQPtr, pcbRequest);
 
 		if(aCPU->IoQueue->count != 0 && aCPU->IoQueue->first != aCPU->IoQueue->last) {
