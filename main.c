@@ -21,11 +21,11 @@ int main(int argc, char *argv[]) {
 		pcproc_count = atoi(argv[8]);
 		calcproc_count = process_count - (kproc_count + ioproc_count + (pcproc_count * 2));
 	} else {
-		process_count = 15;
-		kproc_count = 3;
+		process_count = 3;
+		kproc_count = 0;
 		ioproc_count = 3;
-		pcproc_count = 3;
-		calcproc_count = 3;
+		pcproc_count = 0;
+		calcproc_count = 0;
 	}
 
 	ReadyQPtr = QueueConstructor();

@@ -78,7 +78,7 @@ QueuePtr QueueConstructor() {
 }
 
 IODevPtr IOConstructor(int IOidnum, QueuePtr IOQueue) {
-	IODevPtr devptr = (IODevPtr) malloc(sizeof(IODev));
+	IODevPtr devptr = (IODevPtr) malloc(sizeof(IODev)*2);
 
 	devptr->IOID = IOidnum;
 	devptr->IOAvailable = 0;
@@ -117,11 +117,15 @@ void *RunIOProcess(void *args) {
 	while(1) {
 		sleep(1);
 		if (devptr->owner != NULL) {
-			sleep((rand() % 5) + 1);
+			sleep((rand() % 5) + 5);
 			if (devptr->IOID == 1) {
 				IO1INT = 1;
+				sleep(5);
+				//printf("jkhadjaldjhjsadhfljshafdjhsaldfjhsajdfhlsjahfd");
 			} else {
 				IO2INT = 1;
+				sleep(5);
+				//printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 			}
 		}
 	}
@@ -140,7 +144,7 @@ void QueueDestruct(QueuePtr this){
 	free(this);
 }
 
-//Adds a PCB to the end of the queue and incriments the queue count.
+//Adds a PCB to the end of the queue and increments the queue count.
 void enqueue(QueuePtr q, PCBPtr x) {
 	q->q[ q->last ] = x;
 	q->last = (q->last + 1) % QUEUE_SIZE;
@@ -148,7 +152,7 @@ void enqueue(QueuePtr q, PCBPtr x) {
 }
 
 //removes the PCBPtr at the front of the queue and returns it. If the queue is empty,
-//a PCBPtr is returned whose PCBID = -1. Decriments the queue count.
+//a PCBPtr is returned whose PCBID = -1. Decrements the queue count.
 PCBPtr dequeue(QueuePtr q) {
 	PCBPtr x = PCBConstructor(-1, -1, 0, -1);
 	if (q->first != q->last) {

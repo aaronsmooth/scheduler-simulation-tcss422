@@ -32,7 +32,7 @@ KBDevPtr KBDevConstructor() {
 
 void KBDevDestructor(KBDevPtr this) {
 	//pthread_cancel(this->keyboard_thread);
-	free(this);
+	//free(this);
 }
 
 void *KBDevRun(void *args) {

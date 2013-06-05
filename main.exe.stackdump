@@ -1,10 +1,10 @@
 Exception: STATUS_ACCESS_VIOLATION at eip=004013B4
-eax=00000000 ebx=00000006 ecx=61188740 edx=00000001 esi=61278270 edi=0028CD68
-ebp=0028AC18 esp=0028ABE0 program=D:\cygwin\home\mike\scheduler_simu\main.exe, pid 12576, thread main
+eax=00000000 ebx=00000000 ecx=61188740 edx=00000001 esi=61278110 edi=0028CD68
+ebp=0028AC18 esp=0028ABE0 program=D:\cygwin\home\Mike\scheduler_simulator\main.exe, pid 1404, thread main
 cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
 Stack trace:
 Frame     Function  Args
 0028AC18  004013B4  (80010798, 80010758, 00000002, FFFFFFFF)
-0028AC58  00402335  (00000001, 0028AC80, 80010100, 612769F2)
+0028AC58  00402A45  (00000001, 0028AC80, 80010100, 612769F2)
 0028ACE8  610078D1  (00000000, 0028CD68, 61006DC0, 00000000)
 End of stack trace
