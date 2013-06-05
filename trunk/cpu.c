@@ -12,6 +12,7 @@
 
 cpuPtr aCPU;
 int runForCount;
+int cpuRunning;
 
 cpuPtr cpuConstructor()
 {
@@ -30,6 +31,7 @@ cpuPtr cpuConstructor()
 	q->runningPCB = NULL;
 	q->count = 5000;
 	aCPU = q;
+	cpuRunning = 1;
 
 	//initialize the mutex array
 	int m;
@@ -211,6 +213,7 @@ void *CPURun(void *args)
 			sleep(1);
 			if (aCPU->count == 0)
 			{
+			cpuRunning = 0;
 			KBDevDestructor(aCPU->Keyboard);
 			pthread_exit(NULL);
 			}
@@ -348,6 +351,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 //producer thread
 void *incCount(void *args) {
 	PCBPtr currentP = (PCBPtr) args;
+	while(cpuRunning) {
 	//int result = pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]);
 	//printf("\n%d", result);
 	//if (result != 0) {
@@ -355,40 +359,43 @@ void *incCount(void *args) {
 	//	//mux->waitingPCB = aCPU->runningPCB;
 	//	mux->waitingPCB = aCPU->runningPCB;
 	//printf("\nMutex location = %d", currentP->sharedMemInd);
-	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
 	//}
 	//printf("\np3");
 	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-	switchOwner(MutexMem[currentP->sharedMemInd]);
-	MutexMem[currentP->sharedMemInd]->owner = currentP;
+		switchOwner(MutexMem[currentP->sharedMemInd]);
+		MutexMem[currentP->sharedMemInd]->owner = currentP;
 	//printf("\n**producer thread**");
-	sharedMemory[currentP->sharedMemInd]++;				//critical region where memory value is changed
-	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+		sharedMemory[currentP->sharedMemInd]++;				//critical region where memory value is changed
+		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
 	//printf("\nproduer complete");
-	MutexMem[currentP->sharedMemInd]->owner = NULL;
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		MutexMem[currentP->sharedMemInd]->owner = NULL;
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		}
 	pthread_exit(NULL);
 }
 //consumer thread
 void *resetCount(void *args) {
 	//printf("\n**consumer thread**");
 	PCBPtr currentP = (PCBPtr) args;
+	while (cpuRunning) {
 	//if (pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]) != 0) {
 		//mux->waitingPCB = aCPU->runningPCB;
 		//printf("\nc1");
 	//	mux->waitingPCB = aCPU->runningPCB;
 		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
 	//}
-	switchOwner(MutexMem[currentP->sharedMemInd]);
+		switchOwner(MutexMem[currentP->sharedMemInd]);
 	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
 	//printf("\nc2");
-	MutexMem[currentP->sharedMemInd]->owner = currentP;
-	while(sharedMemory[currentP->sharedMemInd] == 0) {
-		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-		sharedMemory[currentP->sharedMemInd] = 0;
-	}
+		MutexMem[currentP->sharedMemInd]->owner = currentP;
+		while(sharedMemory[currentP->sharedMemInd] == 0) {
+			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+			sharedMemory[currentP->sharedMemInd] = 0;
+		}
 	//printf("\nConsumer complete");
-	MutexMem[currentP->sharedMemInd]->owner = NULL;
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		MutexMem[currentP->sharedMemInd]->owner = NULL;
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+	}
 	pthread_exit(NULL);
 }
