@@ -5,6 +5,8 @@
  *      Author: Aaron Nelson
  */
 
+#include "process.h"
+
 #ifndef MUTEX_H_
 #define MUTEX_H_
 
@@ -23,7 +25,7 @@ void mutexDestructor(mutexPtr);
 
 void setOwner(mutexPtr, PCBPtr);
 
-mutexPtr switchOwner(mutexPtr);
+void switchOwner(mutexPtr);
 
 void mutexEnqueue(mutexPtr, PCBPtr);
 
