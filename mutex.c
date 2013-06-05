@@ -7,8 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "process.h"
-#include "pcb.h"
 #include "mutex.h"
 
 //constructs the mutex
@@ -39,26 +37,26 @@ void setOwner(mutexPtr the_mutex, PCBPtr the_process) {
 }
 //change the owner of the mutex if the queue is not empty to the first PCB in the mutexQueue
 //sets the PCB to the owner of this mutex, changes state to ready
-//returns the id number of the process who now owns this mutex
-PCBPtr switchOwner(mutexPtr the_mutex) {
+
+void switchOwner(mutexPtr the_mutex) {
 	if (the_mutex->waitingPCB != NULL) {
 		the_mutex->owner = the_mutex->waitingPCB;
 		the_mutex->owner->owns = the_mutex->mutexID;
-		the_mutex->owner->state = 1;
+		//the_mutex->owner->state = 1;
 	} else {
-		the_mutex->mutexLocked = 0;
+		//the_mutex->mutexLocked = 0;
 		the_mutex->owner = NULL;
 	}
-	return the_mutex->owner;
+	//return the_mutex->owner->pid;
 }
 
 //Sets the current PCB's state to blocked
 //Sets the current PCB's waiting on to the mutexID
-//Puts the PCB at the end of the mutex queue.
+//Sets the mutex's waiting PCB to the_process.
 void mutexEnqueue(mutexPtr the_mutex, PCBPtr the_process) {
 	the_process->state = 3;
 	the_process->waiting_on = the_mutex->mutexID;
-	enqueue(the_mutex, the_process);
+	the_mutex->waitingPCB = the_process;
 }
 
 //returns the value of the mutex lock status, 0 = unlocked, 1 = locked.
@@ -82,3 +80,7 @@ void printMutex(mutexPtr the_mutex) {
 		//}
 	}
 }
+/*
+int main(argc, argv) {
+
+	}*/

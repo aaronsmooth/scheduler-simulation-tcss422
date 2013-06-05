@@ -10,29 +10,27 @@
  * timer.c
  *
  *  Created on: May 27, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-//#include "cpu.h"
+#include <windows.h>
 #include "timer.h"
 
-#define QUANTA 1
+#define QUANTA 3000
 
 TimerPtr TimerConstructor() {
 	TimerPtr theTimer = (TimerPtr) malloc(sizeof(Timer));
-	theTimer->mut = PTHREAD_MUTEX_INITIALIZER;
-	theTimer->reset = PTHREAD_COND_INITIALIZER;
+	//theTimer->mut = PTHREAD_MUTEX_INITIALIZER;
+	//theTimer->reset = PTHREAD_COND_INITIALIZER;
 
-	pthread_create(&theTimer->clockThread, NULL, RunTimer, (void *) theTimer);
+	//pthread_create(&theTimer->clockThread, NULL, RunTimer, (void *) theTimer);
+	theTimer->anumber = 0;
 	return theTimer;
 }
 
 void TimerDestructor(TimerPtr this) {
-	pthread_cancel(this->clockThread);
+	//pthread_cancel(this->clockThread);
 	free(this);
 }
 
@@ -40,8 +38,16 @@ void *RunTimer(void *arg) {
 	TimerPtr atimer = (TimerPtr) arg;
 
 	while(1) {
-		sleep(QUANTA);
-		InterruptHandler(7, NULL);
-		pthread_cond_wait(&atimer->reset, &atimer->mut);
+		//if (TIMERINT == 0) {
+			Sleep(QUANTA);
+			TIMERINT = 1;
+			//InterruptHandler(7, NULL);
+			//pthread_cond_wait(&atimer->reset, &atimer->mut);
+		//}
 	}
 }
+/*
+int main(argc, argv) {
+
+
+}*/
