@@ -6,6 +6,7 @@
 typedef struct ConVar {
 	QueuePtr pcbQueue;
 	MtxQueuePtr mutexQueue;
+	int isWaiting;
 } CVStr;
 
 typedef CVStr *CVPtr;

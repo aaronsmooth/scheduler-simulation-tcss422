@@ -65,4 +65,12 @@ void *resetCount(void *);
 
 void InterruptHandler(int, PCBPtr);
 
+void conditionWait(PCBPtr, mutexPtr);
+
+void conditionSignal(PCBPtr);
+
+int mutexLock(PCBPtr);
+
+void mutexUnlock(int);
+
 #endif /* CPU_H_ */
