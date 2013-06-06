@@ -92,7 +92,7 @@ void *CPURun(void *args)
 		//printf();
 		//CV
 		//printf();
-		printf("\n-------------------------\n");
+		printf("\n-------------------------");
 		//printf("\nReady Queue: ");
 		//printQueue(ReadyQPtr);
 		//printf("   Count: %d\n\n", aCPU->count);
@@ -359,7 +359,10 @@ void *incCount(void *args) {
 		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
 		//if mem location == 1, then cond wait
 		if (sharedMemory[currentP->sharedMemInd] == 1)
+		{
+			printf("\nP%d put into CV%d", currentP->pid, currentP->sharedMemInd);
 			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+		}
 		//mutex unlock
 		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 		//mutex lock
@@ -368,12 +371,14 @@ void *incCount(void *args) {
 		sharedMemory[currentP->sharedMemInd] = 1;
 		//cond signal that mem is now full
 		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+		printf("\nCV%d signalled", currentP->sharedMemInd);
 		//mutex unlock
 		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		sleep((rand() % 20) + 5);
+		sleep((rand() % 10) + 20);
 	}
 	pthread_exit(NULL);
 }
+
 //consumer thread
 void *resetCount(void *args) {
 	PCBPtr currentP = (PCBPtr) args;
@@ -383,7 +388,10 @@ void *resetCount(void *args) {
 		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
 		//if mem location == 1, then cond wait
 		if (sharedMemory[currentP->sharedMemInd] == 0)
+		{
+			printf("\nP%d put into CV%d", currentP->pid, currentP->sharedMemInd);
 			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+		}
 		//mutex unlock
 		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 		//mutex lock
@@ -392,10 +400,13 @@ void *resetCount(void *args) {
 		sharedMemory[currentP->sharedMemInd] = 0;
 		//cond signal that mem is now full
 		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+		printf("\nCV%d signalled", currentP->sharedMemInd);
 		//mutex unlock
 		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		sleep((rand() % 20) + 5);
+		sleep((rand() % 10) + 20);
 	}	
 	pthread_exit(NULL);
 		
 }
+
+
