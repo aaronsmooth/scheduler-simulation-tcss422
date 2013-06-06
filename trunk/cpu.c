@@ -349,54 +349,44 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	break;
 	}
 }
+
 //producer thread
 void *incCount(void *args) {
 	PCBPtr currentP = (PCBPtr) args;
-	while(cpuRunning) {
-	//int result = pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]);
-	//printf("\n%d", result);
-	//if (result != 0) {
-	//	printf("\np2");
-	//	//mux->waitingPCB = aCPU->runningPCB;
-	//	mux->waitingPCB = aCPU->runningPCB;
-	//printf("\nMutex location = %d", currentP->sharedMemInd);
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//}
-	//printf("\np3");
-	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-		switchOwner(MutexMem[currentP->sharedMemInd]);
-		MutexMem[currentP->sharedMemInd]->owner = currentP;
-	//printf("\n**producer thread**");
-		sharedMemory[currentP->sharedMemInd]++;				//critical region where memory value is changed
-		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
-	//printf("\nproduer complete");
-		MutexMem[currentP->sharedMemInd]->owner = NULL;
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		}
+	//mutex lock	
+	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//if mem location == 1, then cond wait
+	if (sharedMemory[currentP->sharedMemInd] == 1)
+		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+	//mutex unlock
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+	//mutex lock
+	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//mem = 1
+	sharedMemory[currentP->sharedMemInd] = 1;
+	//cond signal that mem is now full
+	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+	//mutex unlock
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 	pthread_exit(NULL);
 }
 //consumer thread
 void *resetCount(void *args) {
-	//printf("\n**consumer thread**");
 	PCBPtr currentP = (PCBPtr) args;
-	while (cpuRunning) {
-	//if (pthread_mutex_trylock(&mutex[mux->owner->sharedMemInd]) != 0) {
-		//mux->waitingPCB = aCPU->runningPCB;
-		//printf("\nc1");
-	//	mux->waitingPCB = aCPU->runningPCB;
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//}
-		switchOwner(MutexMem[currentP->sharedMemInd]);
-	//pthread_mutex_lock(&mutex[mux->owner->sharedMemInd]);
-	//printf("\nc2");
-		MutexMem[currentP->sharedMemInd]->owner = currentP;
-		while(sharedMemory[currentP->sharedMemInd] == 0) {
-			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-			sharedMemory[currentP->sharedMemInd] = 0;
-		}
-	//printf("\nConsumer complete");
-		MutexMem[currentP->sharedMemInd]->owner = NULL;
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-	}
+	//mutex lock	
+	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//if mem location == 1, then cond wait
+	if (sharedMemory[currentP->sharedMemInd] == 1)
+		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+	//mutex unlock
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+	//mutex lock
+	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+	//mem = 1
+	sharedMemory[currentP->sharedMemInd] = 1;
+	//cond signal that mem is now full
+	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+	//mutex unlock
+	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
 	pthread_exit(NULL);
 }
