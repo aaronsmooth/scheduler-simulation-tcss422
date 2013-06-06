@@ -2,7 +2,7 @@
  * mutex.c
  *	This is a mutex object that has a queue for those waiting to acquire the mutex.
  *  Created on: May 26, 2013
- *      Author: Aaron Nelson
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #include <stdio.h>

@@ -2,7 +2,7 @@
  * process.c
  *
  *  Created on: May 25, 2013
- *      Author: Aaron Nelson
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #include <windows.h>
@@ -169,7 +169,7 @@ void printQueue(QueuePtr q) {
 		int i;
 		int j = q->last;
 		PCBPtr PCB = q->q[q->first];
-		printf("\n");
+		//printf("\n");
 		printf("P%d", getPCBId(PCB));
 		for (i = q->first + 1; i < j; i++) {
 			Queue current_queue = *q;

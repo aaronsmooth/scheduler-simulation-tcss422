@@ -2,7 +2,7 @@
  *	cpu.c
  *
  *	Created on: 5/29/2013
- *	Author:	Michael Carr
+ *	Author:	Michael Carr, Aaron Nelson, Ankita Tiku
  */
 
 #include <pthread.h>
@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include "cpu.h"
 
-cpuPtr aCPU;
-int runForCount;
-int cpuRunning;
+cpuPtr aCPU;		//global cpu used
+int runForCount;	//global count of a process' time running
+int cpuRunning;		//flag to indicate whether the cpu is still running
 
 cpuPtr cpuConstructor()
 {
@@ -229,11 +229,12 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if i/o request
 	case 1:
 		aCPU->runningPCB->state = 2;
-		if(aCPU->IO1->owner == NULL) {
+		int number = rand() % 2;
+		if((aCPU->IO1->owner == NULL) && (number == 1)) {
 			printf("\nP%d moved to I/O1 device", aCPU->runningPCB->pid);
 			aCPU->IO1->owner = aCPU->runningPCB;
 		}
-		else if( aCPU->IO2->owner == NULL ) {
+		else if((aCPU->IO2->owner == NULL) && (number == 0)) {
 			printf("\nP%d moved to I/O2 device", aCPU->runningPCB->pid);
 			aCPU->IO2->owner = aCPU->runningPCB;
 		}
@@ -283,7 +284,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	//if i/o 2 complete
 	case 4:
 		IO2INT = 0;
-		printf("\nP%d's I/O interrupt complete");
+		printf("\nP%d's I/O interrupt complete", pcbRequest->pid);
 		printf("\nP%d moved from I/O2 to ready queue", pcbRequest->pid);
 		pcbRequest->state = 1;
 		enqueue(ReadyQPtr, pcbRequest);
