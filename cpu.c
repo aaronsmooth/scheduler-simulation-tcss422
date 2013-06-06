@@ -353,40 +353,49 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 //producer thread
 void *incCount(void *args) {
 	PCBPtr currentP = (PCBPtr) args;
-	//mutex lock	
-	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//if mem location == 1, then cond wait
-	if (sharedMemory[currentP->sharedMemInd] == 1)
-		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-	//mutex unlock
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-	//mutex lock
-	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//mem = 1
-	sharedMemory[currentP->sharedMemInd] = 1;
-	//cond signal that mem is now full
-	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
-	//mutex unlock
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+	while( cpuRunning )
+	{
+		//mutex lock	
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+		//if mem location == 1, then cond wait
+		if (sharedMemory[currentP->sharedMemInd] == 1)
+			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+		//mutex unlock
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		//mutex lock
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+		//mem = 1
+		sharedMemory[currentP->sharedMemInd] = 1;
+		//cond signal that mem is now full
+		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+		//mutex unlock
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		sleep((rand() % 20) + 5);
+	}
 	pthread_exit(NULL);
 }
 //consumer thread
 void *resetCount(void *args) {
 	PCBPtr currentP = (PCBPtr) args;
-	//mutex lock	
-	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//if mem location == 1, then cond wait
-	if (sharedMemory[currentP->sharedMemInd] == 1)
-		pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-	//mutex unlock
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-	//mutex lock
-	pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-	//mem = 1
-	sharedMemory[currentP->sharedMemInd] = 1;
-	//cond signal that mem is now full
-	pthread_cond_signal(&condVar[currentP->sharedMemInd]);
-	//mutex unlock
-	pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+	while( cpuRunning )
+	{
+		//mutex lock	
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+		//if mem location == 1, then cond wait
+		if (sharedMemory[currentP->sharedMemInd] == 0)
+			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
+		//mutex unlock
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		//mutex lock
+		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
+		//mem = 0
+		sharedMemory[currentP->sharedMemInd] = 0;
+		//cond signal that mem is now full
+		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
+		//mutex unlock
+		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
+		sleep((rand() % 20) + 5);
+	}	
 	pthread_exit(NULL);
+		
 }
