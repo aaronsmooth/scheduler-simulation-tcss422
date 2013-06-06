@@ -5,6 +5,7 @@ CVPtr CVConstructor(void)
 	CVPtr c = (CVPtr) malloc(sizeof(CVStr));
 	c->pcbQueue = QueueConstructor();
 	c->mutexQueue = MutexQueueConstructor();
+	c->isWaiting = 0;
 	return c;
 }
 

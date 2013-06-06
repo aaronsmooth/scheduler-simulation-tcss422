@@ -1,23 +1,27 @@
 /*
  *	cpu.c
  *
- *	Created on: 5/29/2013
+ *	Created on: 5/24/2013
  *	Author:	Michael Carr, Aaron Nelson, Ankita Tiku
  */
 
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 #include "cpu.h"
-
+#include "CondVar.h"
+CVPtr* condVar;
+mutexPtr* mutex;
 cpuPtr aCPU;		//global cpu used
 int runForCount;	//global count of a process' time running
 int cpuRunning;		//flag to indicate whether the cpu is still running
 
 cpuPtr cpuConstructor()
 {
-	//create CPU with random count between 1000 and 10000
 	cpuPtr q = (cpuPtr) malloc(sizeof(cpuObj));
+	condVar = (CVPtr*) malloc(sizeof(CVPtr) * (pcproc_count * 2));
+	mutex = (mutexPtr*) malloc(sizeof(mutexPtr) * pcproc_count);
 	q->schedulerReady = 0;
 	q->schedulerQueue = QueueConstructor();
 	q->isRunning = FALSE;
@@ -26,20 +30,21 @@ cpuPtr cpuConstructor()
 	q->IO1 = IOConstructor(1, q->IoQueue);
 	q->IO2 = IOConstructor(2, q->IoQueue);
 	q->Keyboard = KBDevConstructor();
-	//q->T1 = TimerConstructor();
 	q->runCount = 0;
 	q->runningPCB = NULL;
-	q->count = 5000;
+	q->count = (rand() % 9000) + 1000;
 	aCPU = q;
 	cpuRunning = 1;
-
-	//initialize the mutex array
-	int m;
-	for (m = 0; m < MUTEXARRSIZE; m++)
+	
+	//initialize the mutex array and condition variable array
+	int m = 0;
+	for (; m < pcproc_count; m++)
 	{
-		mutex[m] = PTHREAD_MUTEX_INITIALIZER;
-		condVar[m] = PTHREAD_COND_INITIALIZER;
-		MutexMem[m] = mutexConstructor(m);
+		mutex[m] = mutexConstructor(m);
+	}
+	for (m = 0 ; m < (pcproc_count * 2); m++)
+	{
+		condVar[m] = CVConstructor();
 	}
 
 	//create 2 IO devices as separate threads
@@ -64,39 +69,39 @@ void *CPURun(void *args)
 	int interruptOccurred = (IO1INT || IO2INT || KBINT || TIMERINT);
 
 	while(aCPU->count > 0)
-	{
-		printf("\n\n\nP%d - running", aCPU->runningPCB->pid);
-
+	{	
+		
+		//PRINT OUT OF CURRENT SETTINGS
+		sleep(1);
+		printf("\n\n\n\n\n\n\n\n");
+		printf("P%d - running", aCPU->runningPCB->pid);
 		if (aCPU->IO1->owner != NULL) printf("\nI/O1 - P%d", aCPU->IO1->owner->pid);
 		if (aCPU->IO2->owner != NULL) printf("\nI/O2 - P%d", aCPU->IO2->owner->pid);
-		
 		if (aCPU->IoQueue->count > 0)
 		{
 			printf("\nI/O Waiting - ");
 			printQueue(aCPU->IoQueue);
 		}
-		//Mutex MutexMem[MUTEXARRSIZE]
-		int m = pcproc_count;
-		if (m > 0 && MutexMem[0]->owner != NULL)
+		int m;
+		for(m = 0; m < pcproc_count; m++)
 		{
-			int j = 0;
-			while (MutexMem[j]->owner != NULL)
+			if (mutex[m]->owner != NULL) printf("\nM%d - P%d owns", m, mutex[m]->owner->pid);
+		}
+		for(m = 0; m < pcproc_count * 2; m++)
+		{
+			if (condVar[m] != NULL ) 
 			{
-				printf("\nM%d - P%d owns", j, MutexMem[j]->owner->pid);
-				if ( MutexMem[j]->waitingPCB != NULL ) printf(", P%d waiting", MutexMem[j]->waitingPCB->pid);
-				j++;
+				if (condVar[m]->pcbQueue->count > 0)
+				{
+					printf("\nCV%d - ", m);
+					printQueue(condVar[m]->pcbQueue);
+				}
 			}
 		}
-
 		//Keyboard
 		//printf();
-		//CV
-		//printf();
 		printf("\n-------------------------");
-		//printf("\nReady Queue: ");
-		//printQueue(ReadyQPtr);
-		//printf("   Count: %d\n\n", aCPU->count);
-		//runForCount = 5;
+		
 		if(interruptOccurred == 0)
 		{
 			if(aCPU->runningPCB->curr_count > WAIT_TIME)
@@ -112,16 +117,6 @@ void *CPURun(void *args)
 		
 		while(runForCount > 0)
 		{
-			/*
-			printf("\nRunning Process: P%d		COUNT = %d\n", aCPU->runningPCB->pid, aCPU->count);
-			printf("\nCPU Count = %d", aCPU->count);
-			printf("\ninner loop, run for count: %d", runForCount);
-			if (aCPU->IO1->owner != NULL) printf("\nIO1 owner: P%d", aCPU->IO1->owner->pid);
-			if (aCPU->IO2->owner != NULL) printf("\nIO2 owner: P%d", aCPU->IO2->owner->pid);
-			printf("\nIO Queue: ");
-			printQueue(aCPU->IoQueue);
-			printf("\n");
-			*/
 			runForCount--;
 			aCPU->runningPCB->curr_count++;
 			if (aCPU->runningPCB->curr_count == WAIT_TIME) TIMERINT = 1;
@@ -163,29 +158,6 @@ void *CPURun(void *args)
 						TIMERINT = 1;
 					}
 				}
-				/*
-				int flag = 0;
-				int i;
-				for(; flag != 1;) 
-				{
-					if ( (rand() % 6) == 5 ) 
-					{
-						aCPU->runningPCB->curr_count = /*aCPU->runningPCB->curr_count -*//* runForCount;
-						InterruptHandler( 1, aCPU->runningPCB);
-						flag = 1;
-					}
-					else if ( runForCount == 1 )
-					{
-						TIMERINT = 1;
-						flag = 1;
-					}
-					if ( flag == 0 ) 
-					{
-					runForCount--;
-					aCPU->count--;
-					}
-				}
-				runForCount = 0;*/
 			}
 			else if ((processType == 2) && (runForCount != 0))
 			{
@@ -210,14 +182,12 @@ void *CPURun(void *args)
 				runForCount = 0;
 			}
 			aCPU->count--;
-			sleep(1);
 			if (aCPU->count == 0)
 			{
 			cpuRunning = 0;
 			KBDevDestructor(aCPU->Keyboard);
 			pthread_exit(NULL);
 			}
-		//printf("\nEscape Inner Loop");
 		}
 	}
 }
@@ -230,11 +200,13 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 	case 1:
 		aCPU->runningPCB->state = 2;
 		int number = rand() % 2;
-		if((aCPU->IO1->owner == NULL) && (number == 1)) {
+		if((aCPU->IO1->owner == NULL) && (number == 1) ||
+		   (aCPU->IO1->owner == NULL && aCPU->IO2->owner != NULL)) {
 			printf("\nP%d moved to I/O1 device", aCPU->runningPCB->pid);
 			aCPU->IO1->owner = aCPU->runningPCB;
 		}
-		else if((aCPU->IO2->owner == NULL) && (number == 0)) {
+		else if((aCPU->IO2->owner == NULL) && (number == 0) ||
+		   (aCPU->IO2->owner == NULL && aCPU->IO1->owner != NULL)) {
 			printf("\nP%d moved to I/O2 device", aCPU->runningPCB->pid);
 			aCPU->IO2->owner = aCPU->runningPCB;
 		}
@@ -306,6 +278,7 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 		if(aCPU->Keyboard->Blocked->count != 0) {
 			aCPU->Keyboard->owner = dequeue(aCPU->Keyboard->Blocked);
 			aCPU->Keyboard->keyboardFree = 1;
+			printf("\nKeyboard owner given to P%d", aCPU->Keyboard->owner->pid);
 		} else {
 			aCPU->Keyboard->owner = NULL;
 			aCPU->Keyboard->keyboardFree = 0;
@@ -352,61 +325,106 @@ void InterruptHandler(int interrupt, PCBPtr pcbRequest)
 
 //producer thread
 void *incCount(void *args) {
+	//printf("\nPRODUCER THREAD CREATED=================================");
 	PCBPtr currentP = (PCBPtr) args;
-	while( cpuRunning )
+	sleep(1);
+	if ( mutexLock(currentP) == 0 ) pthread_exit(NULL);
+	if (sharedMemory[currentP->sharedMemInd] == 1)
 	{
-		//mutex lock	
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-		//if mem location == 1, then cond wait
-		if (sharedMemory[currentP->sharedMemInd] == 1)
-		{
-			printf("\nP%d put into CV%d", currentP->pid, currentP->sharedMemInd);
-			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-		}
-		//mutex unlock
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		//mutex lock
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-		//mem = 1
-		sharedMemory[currentP->sharedMemInd] = 1;
-		//cond signal that mem is now full
-		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
-		printf("\nCV%d signalled", currentP->sharedMemInd);
-		//mutex unlock
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		sleep((rand() % 10) + 20);
+		conditionWait(currentP, mutex[currentP->sharedMemInd]);
 	}
+	sharedMemory[currentP->sharedMemInd] = 1;
+	printf("\nShared Memory[%d] = 1 ((Changed by M%d owner - P%d))", currentP->sharedMemInd, currentP->sharedMemInd, mutex[currentP->sharedMemInd]->owner->pid);
+	sleep(1);
+	conditionSignal(currentP);
+	mutexUnlock(currentP->sharedMemInd);
 	pthread_exit(NULL);
 }
 
 //consumer thread
 void *resetCount(void *args) {
+	//printf("\nCONSUMER THREAD CREATED=================================");
 	PCBPtr currentP = (PCBPtr) args;
-	while( cpuRunning )
+	sleep(1);
+	if ( mutexLock(currentP) == 0 ) pthread_exit(NULL);
+	if (sharedMemory[currentP->sharedMemInd] == 0)
 	{
-		//mutex lock	
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-		//if mem location == 1, then cond wait
-		if (sharedMemory[currentP->sharedMemInd] == 0)
-		{
-			printf("\nP%d put into CV%d", currentP->pid, currentP->sharedMemInd);
-			pthread_cond_wait(&condVar[currentP->sharedMemInd], &mutex[currentP->sharedMemInd]);
-		}
-		//mutex unlock
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		//mutex lock
-		pthread_mutex_lock(&mutex[currentP->sharedMemInd]);
-		//mem = 0
-		sharedMemory[currentP->sharedMemInd] = 0;
-		//cond signal that mem is now full
-		pthread_cond_signal(&condVar[currentP->sharedMemInd]);
-		printf("\nCV%d signalled", currentP->sharedMemInd);
-		//mutex unlock
-		pthread_mutex_unlock(&mutex[currentP->sharedMemInd]);
-		sleep((rand() % 10) + 20);
-	}	
+		conditionWait(currentP, mutex[currentP->sharedMemInd]);
+	}
+	sharedMemory[currentP->sharedMemInd] = 0;
+	printf("\nShared Memory[%d] = 0 ((Changed by M%d owner - P%d))", currentP->sharedMemInd, currentP->sharedMemInd, mutex[currentP->sharedMemInd]->owner->pid);
+	sleep(1);
+	conditionSignal(currentP);
+	mutexUnlock(currentP->sharedMemInd);
 	pthread_exit(NULL);
-		
+}
+
+void conditionWait(PCBPtr pcb, mutexPtr mtx)
+{
+	int id = pcb->sharedMemInd * 2;
+	if ( pcb->process->proc_type == 4 ) id++;
+	if ( mutex[pcb->sharedMemInd]->owner->pid != pcb->pid )
+	{
+		printf("\nP%d put into CV%d", pcb->pid, pcb->sharedMemInd);
+		MutexEnqueue(condVar[id]->mutexQueue, mtx);
+		enqueue(condVar[id]->pcbQueue, pcb);
+		condVar[id]->isWaiting = 1;
+		while ( condVar[id]->isWaiting == 1 )
+		{
+			sleep(1);
+		}
+	}
+	else
+	{
+		pthread_exit(NULL);
+	}
+}
+
+void conditionSignal(PCBPtr pcb)
+{
+	int id = pcb->sharedMemInd * 2;
+	if ( pcb->process->proc_type == 4 ) id++;
+	if (condVar[id]->pcbQueue->count > 0)
+	{
+		condVar[id]->isWaiting = 0;
+		MutexDequeue(condVar[id]->mutexQueue);
+		dequeue(condVar[id]->pcbQueue);
+	}
+}
+
+int mutexLock(PCBPtr pcb)
+{
+	if ( mutex[pcb->sharedMemInd]->owner == NULL )
+	{
+		mutex[pcb->sharedMemInd]->owner = pcb;
+		mutex[pcb->sharedMemInd]->mutexLocked = 1;
+		printf("\nM%d lock acquired by P%d", pcb->sharedMemInd, pcb->pid);
+	}
+	if ( mutex[pcb->sharedMemInd]->owner != NULL &&
+		 mutex[pcb->sharedMemInd]->owner->pid != pcb->pid )
+	{
+		mutex[pcb->sharedMemInd]->waitingPCB = pcb;
+		return 0;
+	}
+	return 1;
+}
+
+void mutexUnlock(int MtxID)
+{
+	if ( mutex[MtxID]->owner != NULL )
+	{
+		if ( mutex[MtxID]->waitingPCB != NULL )
+		{
+			mutex[MtxID]->owner = mutex[MtxID]->waitingPCB;
+			mutex[MtxID]->waitingPCB = NULL;
+			printf("\nM%d lock acquired by P%d", MtxID, mutex[MtxID]->owner->pid);
+		}
+		else
+		{
+			mutex[MtxID]->owner = NULL;
+			mutex[MtxID]->mutexLocked = 0;
+		}
+	}
 }
 
 

@@ -39,15 +39,36 @@ void *KBDevRun(void *args) {
 	KBDevPtr aKB = (KBDevPtr) args;
 
 	int loopctrl = 1;
-	while(loopctrl) {
-		if(KBHASPCB) {
-		printf("\nA key was pressed");
-		getchar();
-		KBINT = 1;
-		InterruptHandler(5, aKB->owner);
+	while(loopctrl) 
+	{
+		char ch = '~';
+		do 
+		{
+			ch = getchar();
+			getchar();
+		} while (ch=='~');
+		printf("\n~~~~~The key '%c' was pressed~~~~~", ch);
+		if (ch == 't') TIMERINT = 1;
+		else KBINT = 1;
+		ch = '~';
+		//InterruptHandler(5, aKB->owner);
+		//loopctrl++;
+		sleep(1);
+	}
+	/*
+	int loopctrl = 1;
+	while(loopctrl) 
+	{
+		if(KBHASPCB) 
+		{
+			printf("\nA key was pressed");
+			getchar();
+			KBINT = 1;
+			InterruptHandler(5, aKB->owner);
 		}
 		sleep(1);
 	}
+	*/
 	pthread_exit(NULL);
 
 }
