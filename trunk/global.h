@@ -1,5 +1,8 @@
 /*
  * global.h
+ *
+ *	Created on: 5/29/2013
+ *	Author:	Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #include "process.h"

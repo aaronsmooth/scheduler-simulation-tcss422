@@ -2,7 +2,7 @@
  * main.c
  *
  *  Created on: May 21, 2013
- *      Author: Aaron Nelson
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 #include <stdio.h>
 #include <stdlib.h>

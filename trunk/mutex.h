@@ -2,7 +2,7 @@
  * mutex.h
  *  This is the header file for a mutex object.
  *  Created on: May 26, 2013
- *      Author: Aaron Nelson
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #include "process.h"

@@ -2,7 +2,7 @@
  * timer.h
  *
  *  Created on: Jun 1, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 /*
 

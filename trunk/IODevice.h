@@ -2,7 +2,7 @@
  * IODevice.h
  *
  *  Created on: May 30, 2013
- *      Author: Aaron Nelson
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #ifndef IODEVICE_H_

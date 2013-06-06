@@ -2,7 +2,7 @@
  * IODevice.c
  *
  *  Created on: May 30, 2013
- *      Author: Toshiba Home
+ *      Author: Aaron Nelson, Ankita Tiku, Michael Carr
  */
 
 #include <conio.h>
